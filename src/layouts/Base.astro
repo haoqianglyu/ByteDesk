@@ -1,0 +1,45 @@
+---
+import '../styles/global.css';
+import '../styles/desktop.css';
+import '../styles/glass-icons.css';
+import '../styles/showcase.css';
+import '../styles/zoji.css';
+import '../styles/window-resize.css';
+import '../styles/desktop-menu.css';
+import DesktopShell from '../components/DesktopShell.vue';
+import { isIndexableSite } from '../lib/site';
+import { publishedPosts, forLocale, card } from '../lib/content';
+import { type Locale } from '../lib/i18n';
+interface Props { locale: Locale; title?: string; description?: string; active?: string; alternateHref?: string; noindex?: boolean }
+const { locale, title = 'ByteDesk · 字节桌面', description = locale === 'zh' ? '记录代码，也记录灵感。记录宠物、日常、旅游、代码，也展示界面实验与个人项目。' : 'A home for code and ideas. Stories, interface experiments and personal projects.', active, alternateHref = `/${locale === 'zh' ? 'en' : 'zh'}/`, noindex = false } = Astro.props;
+const posts = forLocale(await publishedPosts(), locale).map(card);
+const production = isIndexableSite(Astro.site);
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+<!doctype html>
+<html lang={locale === 'zh' ? 'zh-CN' : 'en'}>
+ <head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>{title}</title><meta name="description" content={description}/><link rel="icon" type="image/svg+xml" href="/favicon.svg?v=bytedesk-2"/>
+  <meta name="theme-color" content="#102b50"/>
+  {(!production || noindex) && <meta name="robots" content="noindex, follow"/>}
+  {production && <link rel="canonical" href={canonical}/>}
+  {production && !noindex && <><link rel="alternate" hreflang={locale === 'zh' ? 'zh-CN' : 'en'} href={canonical}/><link rel="alternate" hreflang={locale === 'zh' ? 'en' : 'zh-CN'} href={new URL(alternateHref, Astro.site)}/></>}
+  <meta property="og:title" content={title}/><meta property="og:description" content={description}/><meta property="og:type" content="website"/>
+  <link rel="alternate" type="application/rss+xml" title={`ByteDesk ${locale}`} href={`/${locale}/rss.xml`}/>
+  <script is:inline>
+   (() => { try { const p = localStorage.getItem('bytedesk-theme') || 'system'; document.documentElement.dataset.theme = p === 'dark' || (p === 'system' && matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light'; } catch { document.documentElement.dataset.theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; } })();
+  </script>
+ </head>
+ <body><DesktopShell client:load locale={locale} active={active} alternateHref={alternateHref} posts={posts}><slot/></DesktopShell>
+  <script is:inline>
+   // Restore the server-rendered menu before hydration to avoid a visible jump to its top.
+   try {
+    const position = JSON.parse(sessionStorage.getItem(`bytedesk-sidebar-scroll-${innerWidth <= 600 ? 'mobile' : 'desktop'}`) || 'null');
+    if (Array.isArray(position) && position.length === 2 && position.every(value => Number.isFinite(value) && value >= 0)) {
+     document.querySelector('.sidebar')?.scrollTo({ left: position[0], top: position[1], behavior: 'instant' });
+    }
+   } catch {}
+  </script>
+ </body>
+</html>

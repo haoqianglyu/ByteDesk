@@ -1,0 +1,14 @@
+---
+import Base from '../../../layouts/Base.astro';
+import GlassPlayground from '../../../components/GlassPlayground.vue';
+import { locales, type Locale } from '../../../lib/i18n';
+export function getStaticPaths() { return locales.map(locale => ({ params: { locale } })); }
+const locale = Astro.params.locale as Locale;
+const zh = locale === 'zh';
+---
+<Base locale={locale} active="lab" title={`${zh ? '玻璃的另一面' : 'Through the glass'} · ByteDesk`} alternateHref={`/${zh ? 'en' : 'zh'}/lab/glass-playground/`}>
+ <div class="showcase-page work-detail"><a class="work-back" href={`/${locale}/lab/`}>← {zh ? '所有实验' : 'All experiments'}</a><header class="showcase-heading"><p class="eyebrow">EXPERIMENT 001 / INTERFACE</p><h1>{zh ? '玻璃的另一面' : 'Through the glass'}</h1><p>{zh ? '从桌面界面延伸出来的一次材质尝试。透明、模糊、色彩，怎样才刚刚好？' : 'A material study inspired by this desktop. How much transparency, blur and color feels right?'}</p></header>
+ <GlassPlayground locale={locale} client:load/>
+ <div class="work-notes"><h2>{zh ? '这次在探索什么' : 'What this explores'}</h2><p>{zh ? '模糊会柔化背景，不透明度会影响层次和对比度。这里把三个变量拆开，让每一次调整都有可以观察的变化。这个实验不代表网站的最终主题。' : 'Blur softens the background. Opacity changes contrast and depth. Adjusting each variable separately makes its effect easier to see. This study is independent of the website theme.'}</p><a href={`/${locale}/projects/bytedesk/`}>{zh ? '相关项目：ByteDesk ↗' : 'Related project: ByteDesk ↗'}</a></div>
+ </div>
+</Base>

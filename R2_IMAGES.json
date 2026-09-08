@@ -1,0 +1,128 @@
+{
+  "bucket": "bytedesk-images",
+  "publicAccess": "enabled",
+  "objects": [
+    {
+      "key": "cat.jpg",
+      "bytes": 131200,
+      "sha256": "3394b1d33638ca9570185f5e2b84fa71759d612d29b46b5e1718a407ba8b37de"
+    },
+    {
+      "key": "coffee.jpg",
+      "bytes": 197931,
+      "sha256": "20e03bfa99317bb7837566507e0bcf0312ef7f402f3d2be8299e473034a17947"
+    },
+    {
+      "key": "lake.jpg",
+      "bytes": 236983,
+      "sha256": "26685d8764c798efd626308af6a99fce834d1a8cc382f9d7603766cc08685606"
+    },
+    {
+      "key": "projects/zoji/en-01-home.png",
+      "bytes": 1030770,
+      "sha256": "3646e233cdeb41dd853205fde5e277fa6485e756381738844d252d2adbfe5726"
+    },
+    {
+      "key": "projects/zoji/en-02-records.png",
+      "bytes": 712379,
+      "sha256": "acc9f1acc2792d0d8597df78995ac2521ba6cca56bc896aa4717806c376dc9a3"
+    },
+    {
+      "key": "projects/zoji/en-03-reminders.png",
+      "bytes": 658378,
+      "sha256": "66e09a1ed6203481eff97c2ad228b414ab291c235e7f458f2438d91163873a06"
+    },
+    {
+      "key": "projects/zoji/en-04-family.png",
+      "bytes": 759995,
+      "sha256": "cd0f9860431497c8b6ef506864e70f625747255e13355ec6ef74ec265e78a148"
+    },
+    {
+      "key": "projects/zoji/en-05-hospitals.png",
+      "bytes": 944392,
+      "sha256": "60cf3bd088125a4357e43d35e5adccfd714b345098706e36034fbeba9f19b22a"
+    },
+    {
+      "key": "projects/zoji/en-06-health-record.png",
+      "bytes": 672930,
+      "sha256": "e61e7752b2f5711229059a9979e4227184b20bbad4579f6cb656d32fcaf01370"
+    },
+    {
+      "key": "projects/zoji/icon.jpg",
+      "bytes": 25036,
+      "sha256": "f18acd296c194955b844308b2fa9b94068a0d0021b46b5da30054272b1cfdb83"
+    },
+    {
+      "key": "projects/zoji/zh-01-home.png",
+      "bytes": 1007883,
+      "sha256": "e264518e175f57b4f60cd01970cf68b5d65786bcc486ac5b5b06669cb52d9ecd"
+    },
+    {
+      "key": "projects/zoji/zh-02-records.png",
+      "bytes": 708411,
+      "sha256": "3e1f491289ce486d861ffb41b181b5ff1df61f97c348573396ac9890a3e928ce"
+    },
+    {
+      "key": "projects/zoji/zh-03-reminders.png",
+      "bytes": 632051,
+      "sha256": "86c772d0fa66a5031cb182da21c549ef54d8c2945b7b233a28e27c6c8c7eefaf"
+    },
+    {
+      "key": "projects/zoji/zh-04-family.png",
+      "bytes": 744690,
+      "sha256": "4237ba662de54ba956c3ecdaae042c58b45dbea4bc2e728bd717981117d58247"
+    },
+    {
+      "key": "projects/zoji/zh-05-hospitals.png",
+      "bytes": 1122124,
+      "sha256": "6a434e3134bb3e1d0577a473ae78e5a5da24df32a059d4132f55e656f5a2f02f"
+    },
+    {
+      "key": "projects/zoji/zh-06-health-record.png",
+      "bytes": 661464,
+      "sha256": "afcd446bd541689ba4491c1f15920d43622e7bb116b27002df7a8f6e53960aff"
+    },
+    {
+      "key": "wallpapers/earth/day-4k.jpg",
+      "bytes": 1545645,
+      "sha256": "588a0318995237bd682bfd2288657a566726f838b891ba2cf04119c209ff0d9d"
+    },
+    {
+      "key": "wallpapers/earth/night-4k.jpg",
+      "bytes": 926446,
+      "sha256": "4caf142dcf5f4a81343f843fd34b0b7856c1e76a3635bf1f8cd78c6b13b09cb3"
+    },
+    {
+      "key": "wallpapers/earth/ocean-2k.jpg",
+      "bytes": 298695,
+      "sha256": "e66a5601af36a89bf0bce9d3c2d4b10808bb6348c5494e53569fbc83ed348b35"
+    },
+    {
+      "key": "wallpapers/earth/clouds-4k.jpg",
+      "bytes": 4333930,
+      "sha256": "1496bcf4d4d3f4b7ee0443d4ba9e0d7d0f926b777339abfc9b79324d9f3ba85d"
+    },
+    {
+      "key": "wallpapers/campfire/landscape.png",
+      "bytes": 2754357,
+      "sha256": "010a4c275815fe4cf1e6c4a905fe93495ffec1beb759d2aedbe6c4cfec3af603"
+    },
+    {
+      "key": "wallpapers/campfire/portrait.png",
+      "bytes": 2698498,
+      "sha256": "d2ffd830a4bcb9eb8eca4884d2e59acf4242ca792da9ba75ce87fc858832a230"
+    }
+  ],
+  "publicBaseUrl": "https://pub-1f673933452744ec9bf93d16c29e5e97.r2.dev",
+  "verifiedAt": "2026-09-08",
+  "cors": {
+    "allowedOrigins": [
+      "*"
+    ],
+    "allowedMethods": [
+      "GET",
+      "HEAD"
+    ],
+    "maxAgeSeconds": 86400
+  }
+}

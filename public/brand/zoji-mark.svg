@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="80 100 352 308" fill="currentColor">
+  <title>Zoji</title>
+  <ellipse cx="205" cy="163" rx="41" ry="57" transform="rotate(6 205 163)"/>
+  <ellipse cx="307" cy="163" rx="41" ry="57" transform="rotate(-6 307 163)"/>
+  <ellipse cx="129" cy="235" rx="38" ry="49" transform="rotate(-7 129 235)"/>
+  <ellipse cx="382" cy="235" rx="38" ry="49" transform="rotate(7 382 235)"/>
+  <path d="M256 235C296 234 314 260 336 287C354 308 368 329 363 354C359 382 338 401 311 400C286 400 275 383 256 383C236 383 223 400 201 400C171 400 151 380 148 354C142 328 157 307 176 286C198 260 215 235 256 235Z"/>
+</svg>

@@ -1,0 +1,12 @@
+---
+import Base from '../../../layouts/Base.astro';
+import Feed from '../../../components/Feed.vue';
+import TravelJournal from '../../../components/TravelJournal.vue';
+import { publishedPosts, forLocale, card } from '../../../lib/content';
+import { locales, categoryIds, ui, type Locale, type Category } from '../../../lib/i18n';
+export function getStaticPaths() { return locales.flatMap(locale => categoryIds.map(category => ({ params: { locale, category } }))); }
+const locale = Astro.params.locale as Locale;
+const category = Astro.params.category as Category;
+const posts = forLocale(await publishedPosts(), locale).map(card);
+---
+<Base locale={locale} active={category} title={`${ui(locale)[category]} · ByteDesk`} description={ui(locale).categoryDescription[category]} alternateHref={`/${locale === 'zh' ? 'en' : 'zh'}/category/${category}/`}>{category === 'travel' ? <TravelJournal locale={locale} posts={posts.filter(p=>p.category==='travel')} client:load/> : <Feed locale={locale} category={category} posts={posts} client:load/>}</Base>

@@ -1,0 +1,11 @@
+# Campfire wallpaper generation
+
+Tool: built-in image generation, 2026-09-08. Website image assets live in `bytedesk-images` R2, under `wallpapers/campfire/`.
+
+## Landscape prompt
+
+Use case: photorealistic-natural. Asset: cinematic widescreen desktop wallpaper for a personal blog, landscape 16:9 composition. A breathtaking but believable remote wilderness night sky filled with countless fine stars and the luminous dusty Milky Way arching diagonally overhead. In the near foreground exactly two adults seen from behind, seated shoulder to shoulder leaning affectionately against each other, heads tilted up stargazing. Beside them a small real wood campfire with glowing split logs, amber embers and modest natural flames; a beautiful golden retriever lies peacefully nearby, recognizable golden fur softly lit by firelight. Quiet dark mountain horizon and natural grassy rocky campsite. Compose sky as upper 65 percent, foreground people at x=43-50%, y=74%, dog x=57%,y=80%, small fire centered x=53%, y=81%; all important foreground subjects within central 35-63% horizontal band to survive portrait crops, leave the bottom 12% as unobtrusive ground for a desktop dock. Wide environmental photograph from a few metres behind, adults and dog clearly readable but sky dominant. Natural indigo and midnight blue sky, subtle cool silver Milky Way dust, warm amber campfire lighting, visible shadow detail. Refined astrophotography combined with realistically exposed foreground, rich photographic texture and convincing anatomy, intimate peaceful mood. No text, no logos, no watermark, no extra people or animals, no giant planets, no aurora, no cartoon, no neon purple clouds, no dramatic tall flames, no tent, no city lights. High resolution.
+
+## Portrait edit prompt
+
+Edit the generated landscape wallpaper into a portrait mobile wallpaper with 9:19.5 aspect ratio. Preserve the same two adults leaning together, golden retriever, modest wood campfire, remote mountain campsite, warm firelight and photographic Milky Way sky. Reframe and extend the sky vertically rather than cropping away subjects. Keep both people, the entire dog and the fire within the central 85% of the width, with quiet ground at the bottom for the dock. Exactly two people and one golden retriever; no extra objects, text or watermark.

@@ -1,0 +1,46 @@
+---
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.vue';
+import BrandMark from '../../components/BrandMark.vue';
+import ZojiCard from '../../components/ZojiCard.astro';
+import { locales, ui, sectionIds, sectionHref, type Locale } from '../../lib/i18n';
+export function getStaticPaths() { return locales.map(locale => ({ params: { locale } })); }
+const locale = Astro.params.locale as Locale;
+const t = ui(locale);
+---
+<Base locale={locale} active="about" title={`${t.about} · ByteDesk`} alternateHref={`/${locale === 'zh' ? 'en' : 'zh'}/about/`}>
+ <div class="about-page">
+  <p class="eyebrow">A HOME FOR CODE AND IDEAS</p>
+  <div class="about-hero"><span class="about-avatar"><BrandMark variant="tile" size="100%"/></span><div><h1>{locale === 'zh' ? '你好，这里是字节桌面。' : 'Hello. This is ByteDesk.'}</h1><p>{t.tagline}</p></div></div>
+  <div class="prose"><p>{locale === 'zh' ? '一个放代码，也放生活的地方。在这里，技术笔记与旅行照片可以并排，宠物的小小瞬间和普通一天的灵感也同样值得收藏。' : 'A place for code and everyday life. Technical notes sit beside travel photographs. Little moments with pets belong here just as much as ideas from an ordinary day.'}</p></div>
+  <div class="about-categories">{sectionIds.map(category => <a class="about-category" href={sectionHref(locale, category)}><Icon name={category} class={`color-${category}`} size={24}/><span>{t[category]}<small>{category.toUpperCase()}</small></span></a>)}</div>
+  <section class="about-apps" aria-labelledby="my-apps-title"><h2 id="my-apps-title">{locale === 'zh' ? '我做的 App' : 'My apps'}</h2><ZojiCard locale={locale} compact/></section>
+  <section class="friend-links" aria-labelledby="friends-title" id="friends">
+   <h2 id="friends-title">{locale === 'zh' ? '友情链接' : 'Friends'}</h2>
+   <p>{locale === 'zh' ? '也去朋友的网上小屋坐坐。' : 'A friend’s corner of the web. Stop by and say hello.'}</p>
+   <a class="friend-card" href="https://shuaiyuan.me/" target="_blank" rel="noopener noreferrer">
+    <span class="friend-monogram" aria-hidden="true">SY</span>
+    <span><strong>Shuai Yuan</strong><small>shuaiyuan.me</small></span>
+    <span class="friend-arrow" aria-hidden="true">↗</span>
+    <span class="friend-sr">{locale === 'zh' ? '（在新标签页打开）' : ' (opens in a new tab)'}</span>
+   </a>
+  </section>
+  <div class="about-callout"><strong>{locale === 'zh' ? '小站正在慢慢生长。' : 'A little website, still growing.'}</strong><p>{locale === 'zh' ? '这是第一版预览。站长的个人介绍和真实故事将稍后补充；当前文章与照片均为展示布局的示例。' : 'This is the first preview. The owner’s biography and real stories will be added later. Current stories and photographs are samples for exploring the layout.'}</p></div>
+  <div class="prose"><h2>{locale === 'zh' ? '示例图片致谢' : 'Sample photo credits'}</h2></div>
+  <ul class="credit-list"><li><a href="https://unsplash.com/photos/a-cat-is-resting-in-the-sunlight-k-RQ4YLcpkc" target="_blank" rel="noopener noreferrer">Nihal Thakur — {t.pets}</a></li><li><a href="https://unsplash.com/photos/an-open-notebook-with-a-pencil-and-a-cup-of-coffee-kZypzn4qVPg" target="_blank" rel="noopener noreferrer">Ionela Mat — {t.daily}</a></li><li><a href="https://unsplash.com/photos/a-mountain-lake-surrounded-by-snow-covered-mountains-XPVVtqCQWzY" target="_blank" rel="noopener noreferrer">Mattia Poli — {t.travel}</a></li><li><a href="https://unsplash.com/license" target="_blank" rel="noopener noreferrer">Unsplash License</a></li></ul>
+  <section class="prose" id="earth-credits"><h2>{locale === 'zh' ? '地球壁纸素材' : 'Earth wallpaper credits'}</h2><p>{locale === 'zh' ? '地表、云层、夜景与海洋遮罩来自 ' : 'Surface, clouds, night lights and ocean masks by '}<a href="https://www.solarsystemscope.com/textures/" target="_blank" rel="noopener noreferrer">Solar System Scope / INOVE</a>{locale === 'zh' ? '，基于 NASA Blue Marble 等地理与卫星影像数据，使用 ' : ', based on NASA Blue Marble and other geographic and satellite imagery. Licensed under '}<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>{locale === 'zh' ? ' 授权。本站进行了尺寸优化，并加入光照、大气和旋转动画；不是实时卫星画面。' : '. Resized for the web, with lighting, atmosphere and rotation added by ByteDesk. This is a visualization, not a live satellite feed.'}</p></section>
+  <footer class="feed-footer">{t.footer}</footer>
+ </div>
+</Base>
+<style>
+ .friend-links{margin:32px 0;scroll-margin-top:24px}
+ .friend-links h2{font-size:21px;letter-spacing:-.4px}
+ .friend-links>p{color:var(--muted);font-size:13px;margin:8px 0 16px}
+ .friend-card{display:flex;align-items:center;gap:14px;padding:18px;max-width:380px;border:1px solid var(--line);border-radius:12px;background:var(--surface);transition:background .2s}
+ .friend-card:hover{background:var(--hover)}
+ .friend-monogram{display:grid;place-items:center;width:44px;height:44px;border-radius:12px;background:var(--note);color:var(--note-ink);font-size:14px;font-weight:600;flex-shrink:0}
+ .friend-card strong{display:block;font-size:15px;font-weight:600}
+ .friend-card small{display:block;margin-top:3px;color:var(--muted);font-size:12px}
+ .friend-arrow{margin-left:auto;color:var(--muted);font-size:20px}
+ .friend-sr{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+</style>

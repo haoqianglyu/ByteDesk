@@ -1,0 +1,16 @@
+---
+import Base from '../../../layouts/Base.astro';
+import WorkPreview from '../../../components/WorkPreview.vue';
+import { locales, type Locale } from '../../../lib/i18n';
+export function getStaticPaths() { return locales.map(locale => ({ params: { locale } })); }
+const locale = Astro.params.locale as Locale;
+const zh = locale === 'zh';
+---
+<Base locale={locale} active="projects" title="ByteDesk · Projects" alternateHref={`/${zh ? 'en' : 'zh'}/projects/bytedesk/`}>
+ <div class="showcase-page work-detail"><a class="work-back" href={`/${locale}/projects/`}>← {zh ? '所有项目' : 'All projects'}</a><header class="showcase-heading"><p class="eyebrow">PROJECT 001 / PERSONAL WEBSITE</p><h1>ByteDesk<span class="project-title-dot">.</span></h1><p>{zh ? '把生活的记录、代码的积累与突然冒出的灵感，放在同一张桌面上。' : 'A shared home for everyday moments, things learned through code, and ideas that arrive unexpectedly.'}</p></header>
+ <WorkPreview kind="projects"/>
+ <dl class="project-facts"><div><dt>{zh ? '状态' : 'STATUS'}</dt><dd>{zh ? '开发中 · 本地预览' : 'In development · Local preview'}</dd></div><div><dt>{zh ? '技术' : 'BUILT WITH'}</dt><dd>Astro / Vue / TypeScript</dd></div><div><dt>{zh ? '图片存储' : 'PHOTO STORAGE'}</dt><dd>Cloudflare R2</dd></div></dl>
+ <div class="work-notes"><h2>{zh ? '为什么做这个网站' : 'Why this exists'}</h2><p>{zh ? '希望有一个长期属于自己的地方，既能认真写技术文章，也能轻松分享宠物、旅行和日常。桌面提供熟悉的入口，内容决定每个空间的样子。' : 'A lasting personal space for technical writing, pets, travel and everyday life. The desktop offers familiar entry points; the content gives each space its character.'}</p><h2>{zh ? '现在可以体验' : 'Ready to explore'}</h2><ul><li>{zh ? '中英文内容与浅色、深色外观。' : 'Chinese and English content, with light and dark appearances.'}</li><li>{zh ? '可拖动、收起和全屏的桌面窗口，以及全站搜索。' : 'A draggable desktop window, minimize and full-screen controls, and site search.'}</li><li>{zh ? '生活与代码文章、可交互实验、独立项目档案。' : 'Life and code stories, interactive experiments, and dedicated project pages.'}</li></ul><p>{zh ? '目前尚未正式部署，文章与照片仍有示例内容；源码入口会在仓库公开后补充。' : 'Not publicly deployed yet. Stories and photos include samples; a source link will be added when the repository is public.'}</p></div>
+ <div class="project-actions"><a href={`/${locale}/`}>{zh ? '打开桌面' : 'Open the desktop'} ↗</a><a href={`/${locale}/lab/glass-playground/`}>{zh ? '体验相关实验' : 'Try the related experiment'} ↗</a></div>
+ </div>
+</Base>

@@ -1,0 +1,20 @@
+---
+import Icon from './Icon.vue';
+import ZojiCard from './ZojiCard.astro';
+import WorkPreview from './WorkPreview.vue';
+import { showcaseItems } from '../lib/showcase';
+import type { Locale } from '../lib/i18n';
+interface Props { locale: Locale; kind: 'lab' | 'projects' }
+const { locale, kind } = Astro.props;
+const zh = locale === 'zh';
+const items = showcaseItems(locale).filter(item => item.category === kind);
+const lab = kind === 'lab';
+---
+<div class={`showcase-page ${lab ? 'lab-page' : 'projects-page'}`}>
+ <header class="showcase-heading"><p class="eyebrow">{lab ? 'THE LAB / WORK IN PROGRESS' : 'SELECTED WORK / BUILT WITH CARE'}</p><h1>{lab ? (zh ? '给好奇心一点空间。' : 'Room for curiosity.') : (zh ? '把想法，做成作品。' : 'Ideas, made real.')}</h1><p>{lab ? (zh ? '一些新奇的想法、界面与小实验。不必完整，先试试看。' : 'Unusual ideas, interfaces and small experiments. They do not have to be finished to be worth exploring.') : (zh ? '记录做过的项目，也留下它们慢慢生长的过程。' : 'A collection of projects, and the decisions that shape them along the way.')}</p></header>
+ <div class="showcase-section-line"><span>{lab ? (zh ? '正在试验' : 'On the workbench') : (zh ? '项目档案' : 'Project archive')}</span><span>{items.length.toString().padStart(2,'0')}</span></div>
+ {!lab && <ZojiCard locale={locale}/>}
+ <div class="work-grid">{items.filter(item => item.slug !== 'zoji').map((item, index) => <a href={item.href} class="work-card"><WorkPreview kind={kind} slug={item.slug}/><div class="work-card-copy"><div class="work-meta"><span class="work-status"><i></i>{item.status}</span><span>{String(index + 1).padStart(3, '0')}</span></div><h2>{item.title}<Icon name="arrow" size={21}/></h2><p>{item.description}</p><div class="work-tags">{item.tags.map(tag => <span>{tag}</span>)}</div></div></a>)}
+ <aside class="work-open-slot"><Icon name={lab ? 'lab' : 'projects'} size={28}/><h2>{zh ? (lab ? '下一次灵光一闪' : '下一件作品') : (lab ? 'The next “what if?”' : 'The next chapter')}</h2><p>{zh ? (lab ? '一个按钮、一种布局，或者一个还没想清楚的点子。这里留给下一次尝试。' : '更多项目会陆续整理到这里，补上它们的故事、界面与体验入口。') : (lab ? 'A button, a layout, or an idea that is still taking shape. There is space for the next experiment.' : 'More projects will find a home here, with their stories, interfaces and places to try them.')}</p><span>{zh ? '留一点空白，继续创造。' : 'Leave some room to keep creating.'}</span></aside></div>
+ <div class="showcase-crosslink"><span>{zh ? (lab ? '有些实验，会慢慢长成一个项目。' : '作品背后，还有许多未完成的尝试。') : (lab ? 'Some experiments grow into projects.' : 'Behind each project are unfinished experiments.')}</span><a href={`/${locale}/${lab ? 'projects' : 'lab'}/`}>{zh ? (lab ? '看看项目' : '逛逛实验室') : (lab ? 'Explore projects' : 'Visit the lab')} <Icon name="arrow" size={16}/></a></div>
+</div>

@@ -1,0 +1,34 @@
+---
+import { render } from 'astro:content';
+import Base from '../../../layouts/Base.astro';
+import ArticleEnhancements from '../../../components/ArticleEnhancements.vue';
+import { publishedPosts, imageUrl, type Post } from '../../../lib/content';
+import { locales, ui, dateLabel, type Locale } from '../../../lib/i18n';
+export async function getStaticPaths() {
+ const posts = await publishedPosts();
+ const keys = [...new Set(posts.map(p => p.data.translationKey))];
+ return locales.flatMap(locale => keys.map(slug => ({ params: { locale, slug }, props: { post: posts.find(p => p.data.translationKey === slug && p.data.locale === locale) ?? posts.find(p => p.data.translationKey === slug)! } })));
+}
+const { post } = Astro.props as { post: Post };
+const locale = Astro.params.locale as Locale;
+const t = ui(locale);
+const { Content, headings } = await render(post);
+const { data } = post;
+const cover = imageUrl(data.cover);
+const missing = locale !== data.locale;
+---
+<Base locale={locale} active={data.category} title={`${data.title} · ByteDesk`} description={data.description} alternateHref={`/${locale === 'zh' ? 'en' : 'zh'}/posts/${data.translationKey}/`} noindex={missing || data.sample}>
+ <article class="article-wrap">
+  <a class="article-back" href={`/${locale}/category/${data.category}/`}>← {t.back} / {t[data.category]}</a>
+  {missing && <aside class="translation-notice">{locale === 'en' ? t.missing : '这篇内容暂时没有中文译文，以下展示英文原文。'}<a href={`/${data.locale}/posts/${data.translationKey}/`}>{locale === 'en' ? t.missingLink : '查看英文原文'} ↗</a></aside>}
+  <header class="article-header" lang={data.locale === 'zh' ? 'zh-CN' : 'en'}>
+   <div class="article-kicker"><a href={`/${locale}/category/${data.category}/`}>{t[data.category]}</a><span>/</span>{data.tags.map(tag => <span>{tag}</span>)}{data.sample && <span class="sample-badge">{t.sample}</span>}</div>
+   <h1>{data.title}</h1><p class="article-description">{data.description}</p><div class="article-byline"><strong>ByteDesk</strong><span>·</span><time datetime={data.date.toISOString()}>{dateLabel(data.date, locale)}</time><span>·</span><span>{data.minutes} {t.minutes}</span></div>
+  </header>
+  {cover && <figure class="article-cover"><button data-lightbox aria-label={`${t.imageHint} — ${data.coverAlt || data.title}`}><img src={cover} alt={data.coverAlt || data.title} width="1200" height="800" fetchpriority="high"/></button><figcaption><span>{data.sample ? t.sample : t.photo}</span><span>{t.imageHint} ↗</span></figcaption></figure>}
+  <div class="article-body-grid"><div class="prose" lang={data.locale === 'zh' ? 'zh-CN' : 'en'}><Content/></div><aside class="article-toc" aria-label={t.toc}><span>{t.toc}</span>{headings.filter(h => h.depth === 2).map(h => <a href={`#${h.slug}`}>{h.text}</a>)}</aside></div>
+  <div class="article-tags" aria-label={t.tags}>{data.tags.map(tag => <a href={`/${locale}/category/${data.category}/?tag=${encodeURIComponent(tag)}`}># {tag}</a>)}</div>
+  <div class="article-end"><span>{t.footer}</span><a href={`/${locale}/category/${data.category}/`}>{t.next} →</a></div>
+ </article>
+ <ArticleEnhancements client:load locale={locale}/>
+</Base>

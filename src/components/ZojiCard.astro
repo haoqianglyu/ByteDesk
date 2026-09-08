@@ -1,0 +1,17 @@
+---
+import { zojiContent } from '../lib/zoji';
+import type { Locale } from '../lib/i18n';
+interface Props { locale: Locale; compact?: boolean }
+const { locale, compact = false } = Astro.props;
+const z = zojiContent(locale);
+const zh = locale === 'zh';
+---
+<article class:list={['zoji-card', { 'zoji-card-compact': compact }]}>
+ <div class="zoji-card-copy">
+  <a class="zoji-identity" href={`/${locale}/projects/zoji/`}><img class="zoji-app-icon" src={z.icon} alt={zh ? '爪记 Zoji 应用图标' : 'Zoji app icon'} width="512" height="512" loading="lazy"/><span><span class="zoji-kicker">{zh ? '我的 iOS 应用' : 'MY iOS APP'}</span><h2>{z.title}</h2></span></a>
+  <p>{z.description}</p>
+  <div class="zoji-card-actions"><a class="zoji-store-button" href={z.storeUrl} target="_blank" rel="noopener noreferrer" aria-label={`${z.storeLabel} · ${z.storeRegion} ↗`}><span>↓</span>{z.storeLabel}<span aria-hidden="true">↗</span></a><a class="zoji-detail-link" href={`/${locale}/projects/zoji/`}>{zh ? '了解这个 App' : 'Explore the app'} →</a></div>
+  <div class="zoji-platform">iPhone · iOS 17+ <span>·</span> {z.storeRegion}</div>
+ </div>
+ {!compact && <a class="zoji-card-art" href={`/${locale}/projects/zoji/`} aria-label={zh ? '查看爪记 Zoji 的应用截图' : 'Explore Zoji screenshots'}><img src={z.screenshots[0].src} alt={z.screenshots[0].alt} width="1320" height="2868" loading="lazy"/><img src={z.screenshots[1].src} alt={z.screenshots[1].alt} width="1320" height="2868" loading="lazy"/></a>}
+</article>

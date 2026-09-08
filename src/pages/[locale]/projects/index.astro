@@ -1,0 +1,8 @@
+---
+import Base from '../../../layouts/Base.astro';
+import Showcase from '../../../components/Showcase.astro';
+import { locales, ui, type Locale } from '../../../lib/i18n';
+export function getStaticPaths() { return locales.map(locale => ({ params: { locale } })); }
+const locale = Astro.params.locale as Locale;
+---
+<Base locale={locale} active="projects" title={`${ui(locale).projects} · ByteDesk`} description={locale === 'zh' ? '个人项目与作品，记录实现的过程。' : 'Personal projects and the stories behind them.'} alternateHref={`/${locale === 'zh' ? 'en' : 'zh'}/projects/`}><Showcase locale={locale} kind="projects"/></Base>

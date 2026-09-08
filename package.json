@@ -1,0 +1,33 @@
+{
+  "name": "bytedesk",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev --host 127.0.0.1",
+    "build": "astro build",
+    "preview": "astro preview --host 127.0.0.1",
+    "check": "astro check && vue-tsc --noEmit",
+    "test": "node --test tests/*.test.mjs",
+    "verify": "npm run check && npm run build && npm test"
+  },
+  "dependencies": {
+    "@astrojs/vue": "7.0.2",
+    "astro": "7.3.1",
+    "d3-geo": "^3.1.1",
+    "three": "0.185.1",
+    "vue": "3.5.42"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.10",
+    "@types/d3-geo": "^3.1.1",
+    "@types/three": "0.185.4",
+    "typescript": "6.0.3",
+    "vue-tsc": "3.3.11",
+    "wrangler": "4.129.0"
+  },
+  "engines": {
+    "node": ">=24 <25",
+    "npm": ">=11"
+  }
+}

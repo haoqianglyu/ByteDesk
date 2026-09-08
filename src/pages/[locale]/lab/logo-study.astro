@@ -1,0 +1,16 @@
+---
+import Base from '../../../layouts/Base.astro';
+import LogoStudy from '../../../components/LogoStudy.vue';
+import { locales, type Locale } from '../../../lib/i18n';
+export function getStaticPaths() { return locales.map(locale => ({ params: { locale } })); }
+const locale = Astro.params.locale as Locale;
+const zh = locale === 'zh';
+---
+<Base locale={locale} active="lab" title={`${zh ? '在两片之间' : 'Between the pieces'} · ByteDesk`} alternateHref={`/${zh ? 'en' : 'zh'}/lab/logo-study/`}>
+  <div class="showcase-page work-detail">
+    <a class="work-back" href={`/${locale}/lab/`}>← {zh ? '所有实验' : 'All experiments'}</a>
+    <header class="showcase-heading"><p class="eyebrow">EXPERIMENT 002 / FORM & LIGHT</p><h1>{zh ? '在两片之间。' : 'Between the pieces.'}</h1><p>{zh ? '让平面的标记，拥有一点厚度。转个角度，看看光怎样穿过玻璃，或者停留在金属表面。' : 'Giving a flat mark a little depth. Turn it to see light pass through glass, or settle on a silver surface.'}</p></header>
+    <LogoStudy locale={locale} client:visible />
+    <div class="work-notes"><h2>{zh ? '从一个标记开始' : 'It starts with a mark'}</h2><p>{zh ? 'ByteDesk 的标记由两片相向的窗口边角组成。把它们分开，留白会变成空间；换一种材质，同一个形状也会有不同的性格。这个小实验，让你亲手试一试。' : 'The ByteDesk mark is made of two opposing window corners. Separate them and negative space becomes a place. Change the material and the same shape takes on a different character. This little study lets you try it yourself.'}</p></div>
+  </div>
+</Base>

@@ -1,0 +1,24 @@
+---
+import Base from '../../../layouts/Base.astro';
+import AppGallery from '../../../components/AppGallery.vue';
+import ZojiPhone from '../../../components/ZojiPhone.vue';
+import { zojiContent } from '../../../lib/zoji';
+import { locales, type Locale } from '../../../lib/i18n';
+export function getStaticPaths() { return locales.map(locale => ({ params: { locale } })); }
+const locale = Astro.params.locale as Locale;
+const zh = locale === 'zh';
+const z = zojiContent(locale);
+---
+<Base locale={locale} active="projects" title={`${z.title} · ByteDesk`} description={z.description} alternateHref={`/${zh ? 'en' : 'zh'}/projects/zoji/`}>
+ <div class="showcase-page zoji-page">
+  <a class="work-back" href={`/${locale}/projects/`}>← {zh ? '所有项目' : 'All projects'}</a>
+  <header class="zoji-hero">
+   <div class="zoji-hero-copy"><div class="zoji-hero-identity"><img class="zoji-app-icon" src={z.icon} alt={zh ? '爪记 Zoji 应用图标' : 'Zoji app icon'} width="512" height="512"/><div><p class="zoji-kicker">{zh ? '独立开发 · 已上架' : 'INDEPENDENTLY BUILT · ON THE APP STORE'}</p><h1>{z.title}</h1><span>iPhone · iOS 17+</span></div></div><h2>{z.tagline}</h2><p>{z.description}</p><a class="zoji-store-button" href={z.storeUrl} target="_blank" rel="noopener noreferrer" aria-label={`${z.storeLabel} · ${z.storeRegion} ↗`}><span>↓</span>{z.storeLabel}<span aria-hidden="true">↗</span></a><small>{z.storeRegion}</small></div>
+   <ZojiPhone locale={locale} screenshots={z.screenshots} client:visible />
+  </header>
+  <div class="zoji-intro"><p class="eyebrow">LITTLE LIVES, BIG MEMORIES</p><h2>{zh ? '认真照顾，也认真珍藏。' : 'Care for them. Keep their story.'}</h2><p>{zh ? '从一次散步的照片，到一份重要的健康记录。爪记把零散的信息放在一起，让日常照护更有条理，也让陪伴留下痕迹。' : 'From a photo taken on a walk to an important health record, Zoji keeps the little details together — making everyday care easier to organize and memories easier to keep.'}</p></div>
+  <AppGallery locale={locale} screenshots={z.screenshots} client:load/>
+  <section class="zoji-features" aria-label={zh ? '应用特点' : 'App highlights'}><div><span>01 / {zh ? '记录' : 'JOURNAL'}</span><h3>{zh ? '每只宠物，独立珍藏' : 'Each pet, their own story'}</h3><p>{zh ? '建立多宠物档案，记录照片、生活故事、体重与健康资料。' : 'Create individual profiles with photos, life stories, weight trends and health records.'}</p></div><div><span>02 / {zh ? '照护' : 'CARE'}</span><h3>{zh ? '照护安排，放在心上' : 'Keep care in sight'}</h3><p>{zh ? '设置健康提醒、整理病历附件，并在需要时查找附近的宠物医院。' : 'Set care reminders, organize medical attachments and find nearby veterinary hospitals.'}</p></div><div><span>03 / {zh ? '共享' : 'TOGETHER'}</span><h3>{zh ? '自己的记录，家人的陪伴' : 'Your records, shared with care'}</h3><p>{zh ? '数据本地优先保存，可通过 iCloud 同步。主动邀请家人后，一起维护指定宠物的资料。' : 'Local-first storage with optional iCloud sync. Invite family members to help care for a selected pet.'}</p></div></section>
+  <footer class="zoji-footer"><div><h2>{zh ? '给它的生活，留一本日记。' : 'A little journal for their whole world.'}</h2><p>{zh ? '爪记 Zoji，现已在 App Store 上架。' : 'Zoji is available now on the App Store.'}</p></div><a class="zoji-store-button" href={z.storeUrl} target="_blank" rel="noopener noreferrer">{z.storeLabel} ↗</a></footer>
+ </div>
+</Base>

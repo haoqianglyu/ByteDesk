@@ -1,0 +1,10 @@
+---
+import Base from '../../layouts/Base.astro';
+import Feed from '../../components/Feed.vue';
+import { publishedPosts, forLocale, card } from '../../lib/content';
+import { locales, type Locale } from '../../lib/i18n';
+export function getStaticPaths() { return locales.map(locale => ({ params: { locale } })); }
+const locale = Astro.params.locale as Locale;
+const posts = forLocale(await publishedPosts(), locale).map(card);
+---
+<Base locale={locale}><Feed locale={locale} posts={posts} client:load/></Base>
