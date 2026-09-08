@@ -1,6 +1,6 @@
 # ByteDesk 上传 GitHub
 
-公开仓库：[haoqianglyu/ByteDesk](https://github.com/haoqianglyu/ByteDesk)。本文保留首次上传与日常更新的操作说明；仓库已经初始化或关联远端时，跳过对应的初始化步骤。上传源码和部署网站是两个步骤，目前配置的 CI 只检查代码。
+公开仓库：[haoqianglyu/ByteDesk](https://github.com/haoqianglyu/ByteDesk)。本文保留首次上传与日常更新的操作说明；仓库已经初始化或关联远端时，跳过对应的初始化步骤。上传源码和部署网站是两个步骤。网站已部署到 Cloudflare，当前 CI 检查代码和部署包；更新线上网站使用 `npm run deploy`，详见 [部署说明](DEPLOYMENT.md)。
 
 ## 已完成的准备
 
@@ -45,7 +45,7 @@ git push -u origin main
 
 推送前需要完成 GitHub 认证。可使用 GitHub Desktop 登录，或安装并登录 GitHub CLI 后执行 `gh auth setup-git`；不要把令牌写进仓库地址。当前检查到本机有 Git，命令行 PATH 中未找到 `gh`。流程依据 [GitHub 官方上传说明](https://docs.github.com/en/migrations/importing-source-code/using-the-command-line-to-import-source-code/adding-locally-hosted-code-to-github)。
 
-推送成功后，打开仓库 Actions 页确认 CI 通过；检查 README、文件清单和公开内容是否符合预期。GitHub Actions 尚未在远端运行过，本地验证不等于远端 CI 已通过。
+推送成功后，打开仓库 Actions 页确认 CI 通过；检查 README、文件清单和公开内容是否符合预期。GitHub Actions 已在远端成功运行；每次提交仍需查看对应的检查结果。
 
 ## 日常更新
 
@@ -66,7 +66,7 @@ git push -u origin feature/your-change
 | 优先级 | 事项 | 原因 |
 | --- | --- | --- |
 | 正式上线前 | 填写个人介绍和真实文章，处理示例标记 | 当前仍以演示内容为主 |
-| 正式上线前 | 正式站点域名、R2 图片域名、Workers 部署配置 | 目前没有网站部署配置；仅上传 GitHub 不会发布网站 |
+| 正式上线前 | 正式站点域名、R2 图片域名 | Workers 预览已部署；仅上传 GitHub 不会自动更新网站 |
 | 正式上线前 | 手机真机手势、Safari、低性能设备和弱网检查 | 当前主要验证桌面浏览器与模拟尺寸 |
 | 后续优化 | 默认动态壁纸的加载、GPU 与电量开销 | Three.js 有大型共享模块，适合单独性能审计 |
 | 后续优化 | 图片缩略图、响应式图片和更多页面的断图状态 | 目前原图较大，旅行页面已经有失败重试 |

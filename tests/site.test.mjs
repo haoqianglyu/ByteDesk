@@ -116,7 +116,7 @@ test('creative spaces have bilingual routes, working detail pages and matching l
   assert.match(lab, /id="glass-opacity"/);
   assert.ok(lab.includes(`/${locale}/projects/bytedesk/`));
   const project = read(`${locale}/projects/bytedesk/index.html`);
-  assert.ok(project.includes(locale === 'zh' ? '开发中 · 本地预览' : 'In development · Local preview'));
+  assert.ok(project.includes(locale === 'zh' ? '开发中 · 预览版' : 'In development · Preview'));
   assert.ok(read(`${locale}/index.html`).includes(`/${locale}/lab/`));
  }
 });

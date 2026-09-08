@@ -4,7 +4,7 @@
 
 一个采用 macOS 桌面风格的个人博客，使用 Astro、Vue 3 和 TypeScript 构建。文章在构建时生成静态 HTML，窗口、地图和实验由 Vue 提供交互，照片与壁纸素材托管在 Cloudflare R2。
 
-当前处于本地预览阶段，尚未部署网站。仓库附带 6 篇中英文示例文章，示例图片和旅行地点不代表作者的真实经历。
+线上预览：[中文](https://bytedesk.haoqianglyu.workers.dev/zh/) · [English](https://bytedesk.haoqianglyu.workers.dev/en/)。网站已部署到 Cloudflare Workers Static Assets，正式域名稍后配置。仓库附带 6 篇中英文示例文章，示例图片和旅行地点不代表作者的真实经历。
 
 ## 功能
 
@@ -31,7 +31,7 @@ npm run verify   # 类型检查、生产构建、测试
 npm run preview  # 预览 dist，先运行 build
 ```
 
-依赖版本由 `package-lock.json` 固定；`.npmrc` 使用 npm 官方下载源。GitHub Actions 会在推送 main 或提交 PR 后执行 `npm ci` 和 `npm run verify`，不部署网站，也不需要 Cloudflare 密钥。
+依赖版本由 `package-lock.json` 固定；`.npmrc` 使用 npm 官方下载源。GitHub Actions 会在推送 main 或提交 PR 后执行依赖安装、`npm run verify` 和 Wrangler 部署包检查，不自动部署网站，也不需要 Cloudflare 密钥。更新线上网站使用 `npm run deploy`，详见 [部署说明](DEPLOYMENT.md)。
 
 ## 配置
 
@@ -44,7 +44,7 @@ npm run preview  # 预览 dist，先运行 build
 
 `PUBLIC_` 变量会出现在浏览器端，不能用于保存密钥。项目无需 R2 写入凭据即可本地构建；上传图片时单独管理凭据。本地 `.env`、`.dev.vars`、依赖、构建产物及运行缓存已加入 `.gitignore`。
 
-本地 HTTP/回环地址不生成可索引页面；配置公开 HTTPS 地址后启用 canonical 与 robots。示例文章和缺少译文的回退页始终保持 noindex。
+本地 HTTP/回环地址及 `*.workers.dev` 预览地址不生成可索引页面；配置公开 HTTPS 地址后启用 canonical 与 robots。示例文章和缺少译文的回退页始终保持 noindex。
 
 ## 项目结构
 
@@ -63,12 +63,13 @@ tests/             几何、路由、图片、SEO 等检查
 
 - [内容更新与图片管理](CONTENT_GUIDE.md)
 - [GitHub 上传流程与待改进事项](GIT_GUIDE.md)
+- [Cloudflare 部署与网站更新](DEPLOYMENT.md)
 - [设计与开发记录](docs/DEVELOPMENT.md)
 - [示例素材来源](ASSETS.md)、[地图与壁纸素材说明](ASSET_CREDITS.md)
 - [R2 素材清单](R2_IMAGES.json)、[篝火生成提示](CAMPFIRE_PROMPTS.md)
 
 ## 当前限制
 
-真实内容、个人介绍、正式域名和部署配置仍待补充。R2 预览地址需要在上线前替换。图片尚未自动生成缩略图，Three.js 共享模块仍有体积提示；移动设备的耗电、帧率和真实触屏手势需要实机验收。
+真实内容、个人介绍和正式域名仍待补充。当前使用 R2 预览地址，正式发布时应替换为图片自定义域名。图片尚未自动生成缩略图，Three.js 共享模块仍有体积提示；移动设备的耗电、帧率和真实触屏手势需要实机验收。
 
 目前没有为项目代码选定开源许可证。第三方地图、照片及纹理的来源和授权说明见素材文档；不应将它们视为已由本项目重新授权。
