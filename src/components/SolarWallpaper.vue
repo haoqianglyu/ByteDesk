@@ -27,7 +27,11 @@ onMounted(async () => {
   }
   if (cancelled) { scene.dispose(); return; }
   sync();
- } catch { state.value = 'fallback'; }
+ } catch (error) {
+  if (cancelled) return;
+  console.error(`Failed to load ${props.variant} wallpaper`, error);
+  state.value = 'fallback';
+ }
 });
 onUnmounted(() => { cancelled = true; controller.abort(); scene?.dispose(); });
 </script>
@@ -38,8 +42,8 @@ onUnmounted(() => { cancelled = true; controller.abort(); scene?.dispose(); });
    <span class="solar-eyebrow">{{ variant === 'campfire' ? 'B Y T E D E S K / A F T E R D A R K' : 'B Y T E D E S K / O B S E R V A T O R Y' }}</span>
    <strong>{{ locale === 'zh' ? selected.titleZh : selected.titleEn }}</strong>
    <span>{{ locale === 'zh' ? selected.descriptionZh : selected.descriptionEn }}<template v-if="state === 'paused'"> · {{ locale === 'zh' ? '已暂停' : 'Paused' }}</template></span>
-   <span v-if="variant !== 'solar' && state === 'loading'" role="status">{{ locale === 'zh' ? '正在加载壁纸…' : 'Loading wallpaper…' }}</span>
-   <span v-if="variant !== 'solar' && state === 'fallback'" role="status">{{ locale === 'zh' ? '暂时无法加载动态壁纸，可切换其他壁纸。' : 'This wallpaper is unavailable. You can select another wallpaper.' }}</span>
+   <span v-if="state === 'loading'" role="status">{{ locale === 'zh' ? '正在加载壁纸…' : 'Loading wallpaper…' }}</span>
+   <span v-if="state === 'fallback'" role="status">{{ locale === 'zh' ? '暂时无法加载动态壁纸，可切换其他壁纸。' : 'This wallpaper is unavailable. You can select another wallpaper.' }}</span>
   </div></Transition>
  </div>
 </template>
