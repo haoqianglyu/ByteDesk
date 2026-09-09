@@ -16,7 +16,7 @@ test('public HTTPS origins enable canonical URLs and indexing together', () => {
 });
 
 test('Cloudflare preview URLs stay out of search until a custom domain is configured', () => {
- for (const origin of ['https://bytedesk.example.workers.dev', 'https://version-bytedesk.example.workers.dev']) {
+ for (const origin of ['https://bytedesk.example.workers.dev', 'https://version-bytedesk.example.workers.dev', 'https://bytedesk-haoqianglyu.pages.dev', 'https://preview.bytedesk-haoqianglyu.pages.dev']) {
   assert.equal(isIndexableSite(new URL(origin)), false, origin);
  }
 });

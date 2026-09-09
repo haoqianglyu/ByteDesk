@@ -4,7 +4,7 @@
 
 一个采用 macOS 桌面风格的个人博客，使用 Astro、Vue 3 和 TypeScript 构建。文章在构建时生成静态 HTML，窗口、地图和实验由 Vue 提供交互，照片与壁纸素材托管在 Cloudflare R2。
 
-线上预览：[中文](https://bytedesk.haoqianglyu.workers.dev/zh/) · [English](https://bytedesk.haoqianglyu.workers.dev/en/)。网站已部署到 Cloudflare Workers Static Assets，正式域名稍后配置。仓库附带 6 篇中英文示例文章，示例图片和旅行地点不代表作者的真实经历。
+线上网站：[中文](https://haoqianglyu.com/zh/) · [English](https://haoqianglyu.com/en/)。网站部署到 Cloudflare Workers Static Assets，图片和壁纸通过 `img.haoqianglyu.com` 从 R2 加载。仓库附带 6 篇中英文示例文章，示例图片和旅行地点不代表作者的真实经历。
 
 ## 功能
 
@@ -40,11 +40,11 @@ npm run preview  # 预览 dist，先运行 build
 | 变量 | 用途 |
 | --- | --- |
 | `SITE_URL` | 网站完整地址；默认是本地预览。正式构建设置真实 HTTPS 域名。 |
-| `PUBLIC_IMAGE_BASE_URL` | 照片、应用截图与地球/篝火壁纸共用的公开图片地址。默认使用示例 R2 地址。 |
+| `PUBLIC_IMAGE_BASE_URL` | 照片、应用截图与地球/篝火壁纸共用的公开图片地址。默认使用 `https://img.haoqianglyu.com`。 |
 
 `PUBLIC_` 变量会出现在浏览器端，不能用于保存密钥。项目无需 R2 写入凭据即可本地构建；上传图片时单独管理凭据。本地 `.env`、`.dev.vars`、依赖、构建产物及运行缓存已加入 `.gitignore`。
 
-本地 HTTP/回环地址及 `*.workers.dev` 预览地址不生成可索引页面；配置公开 HTTPS 地址后启用 canonical 与 robots。示例文章和缺少译文的回退页始终保持 noindex。
+以本地 HTTP/回环地址、`*.workers.dev` 或 `*.pages.dev` 作为 `SITE_URL` 构建时，不生成可索引页面；正式域名构建启用 canonical 与 robots。通过其他入口访问同一份正式构建时，canonical 仍指向正式域名。示例文章和缺少译文的回退页始终保持 noindex。
 
 ## 项目结构
 
@@ -70,6 +70,6 @@ tests/             几何、路由、图片、SEO 等检查
 
 ## 当前限制
 
-真实内容、个人介绍和正式域名仍待补充。当前使用 R2 预览地址，正式发布时应替换为图片自定义域名。图片尚未自动生成缩略图，Three.js 共享模块仍有体积提示；移动设备的耗电、帧率和真实触屏手势需要实机验收。
+真实内容和个人介绍仍待补充。网站和图片已使用自定义域名，大陆直连表现需要实测。图片尚未自动生成缩略图，Three.js 共享模块仍有体积提示；移动设备的耗电、帧率和真实触屏手势需要实机验收。
 
 目前没有为项目代码选定开源许可证。第三方地图、照片及纹理的来源和授权说明见素材文档；不应将它们视为已由本项目重新授权。

@@ -4,5 +4,5 @@ export function isIndexableSite(site?: URL): boolean {
  const host = site.hostname.toLowerCase();
  return host !== 'localhost' && host !== '[::1]' && host !== '0.0.0.0'
   && !host.startsWith('127.')
-  && !['.localhost', '.local', '.test', '.workers.dev'].some(suffix => host.endsWith(suffix));
+  && !['.localhost', '.local', '.test', '.workers.dev', '.pages.dev'].some(suffix => host.endsWith(suffix));
 }

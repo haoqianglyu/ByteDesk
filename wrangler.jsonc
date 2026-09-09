@@ -4,6 +4,8 @@
   "account_id": "eeaaa3110721a0060056ff910f8a43f6",
   "compatibility_date": "2026-09-08",
   "workers_dev": true,
+  // Custom domains haoqianglyu.com and www.haoqianglyu.com are managed in
+  // the Cloudflare dashboard. Keep routes omitted to preserve those bindings.
   "assets": {
     "directory": "./dist",
     "html_handling": "force-trailing-slash",

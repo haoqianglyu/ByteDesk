@@ -2,7 +2,7 @@ import { existsSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 
 if (existsSync('.env')) process.loadEnvFile('.env');
-const site = new URL(process.env.SITE_URL || 'https://bytedesk.haoqianglyu.workers.dev');
+const site = new URL(process.env.SITE_URL || 'https://haoqianglyu.com');
 if (site.protocol !== 'https:' || site.hostname === 'localhost' || site.username || site.password) {
  throw new Error('Set SITE_URL to the public HTTPS website origin before deploying.');
 }
