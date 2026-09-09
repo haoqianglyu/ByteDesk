@@ -9,14 +9,14 @@ const host = ref<HTMLElement>();
 const state = ref<'loading' | 'ready' | 'error'>('loading');
 const text = computed(() => props.locale === 'zh' ? {
  title: '聊聊这篇文章',
- hint: '无需注册，填写昵称即可留言。邮箱选填，不会公开。评论审核后显示。',
+ hint: '无需注册，填写昵称即可留言。邮箱选填，不会公开。',
  loading: '正在加载评论…',
  error: '评论暂时无法加载，请稍后重试。',
  retry: '重新加载',
  placeholder: '有什么想法，欢迎分享。',
 } : {
  title: 'Join the conversation',
- hint: 'No account needed. Add your name to comment. Email is optional and stays private. Comments appear after moderation.',
+ hint: 'No account needed. Add your name to comment. Email is optional and stays private.',
  loading: 'Loading comments…',
  error: 'Comments could not load. Please try again.',
  retry: 'Try again',
