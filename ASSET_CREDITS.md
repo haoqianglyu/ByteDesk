@@ -1,4 +1,6 @@
-# Earth wallpaper textures
+# ByteDesk map and wallpaper credits
+
+Photo and application screenshot credits are in [ASSETS.md](ASSETS.md). R2 object keys, sizes and hashes are recorded in [R2_IMAGES.json](R2_IMAGES.json); the current public image origin is `https://img.haoqianglyu.com`.
 
 ## Travel atlas vector map
 
@@ -23,9 +25,9 @@ Downloaded 2026-09-08. Four derivatives are hosted in the existing `bytedesk-ima
 
 Visible attribution is included in both localized About pages. Actual ground/cloud patterns and light are an artistic visualization; the night map is historical, clouds do not represent current weather, and rotation is accelerated.
 
-# Campfire and starlight wallpaper
+## Campfire and starlight wallpaper
 
-Created with the built-in image generation tool on 2026-09-08 for ByteDesk. This is an AI-created scene, not a photograph of real people or a particular campsite. The landscape and portrait compositions are stored only as website assets in R2: `wallpapers/campfire/landscape.png` (1672 × 941) and `wallpapers/campfire/portrait.png` (850 × 1850). Original image-generation previews remain in the tool-managed output cache; no bitmap assets are bundled in this repository.
+Created with the built-in image generation tool on 2026-09-08 for ByteDesk. This is an AI-created scene, not a photograph of real people or a particular campsite. The landscape and portrait compositions are stored as website assets in R2: `wallpapers/campfire/landscape.png` (1672 × 941) and `wallpapers/campfire/portrait.png` (850 × 1850). No bitmap assets are bundled in this repository. The original generation prompts are archived in [CAMPFIRE_PROMPTS.md](CAMPFIRE_PROMPTS.md).
 
 The scene uses a generated photographic base with real-time shader animation of the flames, rising embers, local firelight, individual star brightness and an occasional meteor. People, dog, terrain and the Milky Way composition stay still. It is not a fully animated character scene or a recorded video.
 

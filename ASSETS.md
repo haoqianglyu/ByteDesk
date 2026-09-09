@@ -2,7 +2,7 @@
 
 图片仅用于博客示例，不代表站长的真实生活或旅行。三张图片已于 2026-09-08 上传到 R2 bucket `bytedesk-images` 的根目录；对应对象键为 `cat.jpg`、`coffee.jpg`、`lake.jpg`，完整性校验清单见 [R2_IMAGES.json](R2_IMAGES.json)。
 
-已开启公开读取，地址：https://pub-1f673933452744ec9bf93d16c29e5e97.r2.dev。三张远端图片均已核对 HTTP 状态、图片类型、文件大小和 SHA-256，与原文件完全一致。中英文页面现从 R2 加载照片，项目不再保存照片副本。界面图标为项目中的 SVG/Vue 组件。
+已开启公开读取，当前图片域名为 `https://img.haoqianglyu.com`，例如 [cat.jpg](https://img.haoqianglyu.com/cat.jpg)。三张远端图片在上传时已核对 HTTP 状态、图片类型、文件大小和 SHA-256，与原文件完全一致。中英文页面从 R2 加载照片，项目不保存照片副本。界面图标为项目中的 SVG/Vue 组件；地图与壁纸素材另见 [ASSET_CREDITS.md](ASSET_CREDITS.md)。
 
 | 文件 | 作者 | 原始页面 |
 | --- | --- | --- |

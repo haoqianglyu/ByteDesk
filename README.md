@@ -17,7 +17,7 @@
 
 ## 启动
 
-使用 Node.js 24 和 npm 11 或更新版本。安装了 nvm 时可先执行 `nvm use`。
+使用 Node.js 24.x 和 npm 11 或更新版本。安装了 nvm 时可先执行 `nvm use`。
 
 ```sh
 npm ci
@@ -31,7 +31,15 @@ npm run verify   # 类型检查、生产构建、测试
 npm run preview  # 预览 dist，先运行 build
 ```
 
-依赖版本由 `package-lock.json` 固定；`.npmrc` 使用 npm 官方下载源。GitHub Actions 会在推送 main 或提交 PR 后执行依赖安装、`npm run verify` 和 Wrangler 部署包检查。配置部署凭据并启用 CD 后，main 检查通过会自动把已验证的构建产物部署到 Cloudflare Workers；PR 只运行检查。本机也可用 `npm run deploy` 更新，首次配置和暂停方式见 [部署说明](DEPLOYMENT.md)。
+依赖版本由 `package-lock.json` 固定；`.npmrc` 使用 npm 官方下载源。当前文章使用 `.md` 文件，尚未接入 MDX。
+
+## 发布更新
+
+本仓库已启用 GitHub Actions CI/CD：**推送或合并到 `main` → 检查、构建和测试 → 自动部署 Cloudflare Workers → 检查线上页面**。PR 只检查，不发布。
+
+日常协作由助手检查改动、执行 `git add` 和 `git commit`，由仓库所有者执行最终的 `git push`。只保存在本地或完成 commit 尚未上线；推送后到 [Actions](https://github.com/haoqianglyu/ByteDesk/actions/workflows/ci.yml) 确认 `verify`、`deploy` 都通过，再访问正式网站。新增照片仍单独上传 R2。
+
+具体操作见 [Git 提交与发布流程](GIT_GUIDE.md)；部署凭据、暂停、失败重试和手动发布见 [部署说明](DEPLOYMENT.md)。复制或 fork 本仓库时，需要为自己的账号重新配置 CD。
 
 ## 配置
 
@@ -62,7 +70,7 @@ tests/             几何、路由、图片、SEO 等检查
 ## 文档
 
 - [内容更新与图片管理](CONTENT_GUIDE.md)
-- [GitHub 上传流程与待改进事项](GIT_GUIDE.md)
+- [Git 提交、发布流程与待改进事项](GIT_GUIDE.md)
 - [Cloudflare 部署与网站更新](DEPLOYMENT.md)
 - [设计与开发记录](docs/DEVELOPMENT.md)
 - [示例素材来源](ASSETS.md)、[地图与壁纸素材说明](ASSET_CREDITS.md)

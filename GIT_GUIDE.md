@@ -1,76 +1,97 @@
-# ByteDesk 上传 GitHub
+# ByteDesk 提交与发布
 
-公开仓库：[haoqianglyu/ByteDesk](https://github.com/haoqianglyu/ByteDesk)。本文保留首次上传与日常更新的操作说明；仓库已经初始化或关联远端时，跳过对应的初始化步骤。网站部署在 Cloudflare Workers。配置凭据并启用 CD 后，推送 main 会先检查，再自动部署；首次配置见 [部署说明](DEPLOYMENT.md)。
+公开仓库：[haoqianglyu/ByteDesk](https://github.com/haoqianglyu/ByteDesk)。网站已在 [haoqianglyu.com](https://haoqianglyu.com/zh/) 上线，使用 Cloudflare Workers；GitHub Actions CI/CD 已启用。
 
-## 已完成的准备
+**发布路径：推送或合并到 `main` → CI 检查 → 自动部署 Workers → 线上页面检查。** 本地保存文件和 `git commit` 都不会更新线上网站，最终 push 才会触发流程。
 
-- `.gitignore` 排除依赖、构建产物、Astro/Cloudflare 缓存、环境配置和本机文件。
-- `.nvmrc` 与 `package.json` 约定 Node.js 24，锁文件统一使用 npm 官方源，保留依赖版本和完整性校验值。
-- `.github/workflows/ci.yml` 使用只读仓库权限，执行安装、类型检查、构建与测试；启用 CD 后，main 自动部署同一份已验证产物。
-- 图片域名统一配置；本地预览与正式构建的搜索索引规则共用一处判断。
-- README 已整理，历史实现记录保留在 `docs/DEVELOPMENT.md`，移除了本机路径、任务 ID 和工具连接状态。
+## 日常协作分工
 
-## 公开前确认
+助手负责修改、检查、`git add` 和 `git commit`，并报告提交摘要、检查结果、所在分支与提交编号。仓库所有者负责最终 `git push`。助手完成 commit 后停止，不自行推送、合并 PR 或执行手动部署。
 
-1. 选择仓库名称，例如 `ByteDesk`，并确认 GitHub 账户。
-2. 决定是否为自己的代码添加开源许可证。公开仓库不等于授予任意复用权；选好后再添加 `LICENSE`。照片、地图、商标和应用素材按各自说明处理，参考 [GitHub 许可证说明](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/licensing-a-repository)。
-3. 公开仓库中的 Markdown 和资源清单都能被读取，包括 `draft: true` 的文章源码。`draft` 只控制网站构建，不隐藏 Git 文件。未来私人草稿请存到仓库外。
-4. 提交作者使用希望公开的名称和邮箱；如需隐藏真实邮箱，在 GitHub 的 Settings → Emails 获取自己的 noreply 地址。
+### 助手准备本地提交
 
-## 第一次上传
-
-在 [GitHub 新建仓库](https://github.com/new) 页面选择 Public。创建空仓库，不勾选自动添加 README、.gitignore 或许可证，以免与本地内容冲突。创建后复制仓库的 HTTPS 地址。
-
-在项目目录执行以下命令，名称、邮箱和仓库地址须替换为自己的实际值：
+先查看当前分支和改动，核对提交范围，再运行与改动相称的检查。代码或文章改动运行 `npm run verify`；仅维护文档时检查内容、命令与链接。
 
 ```sh
-git init -b main
-git config user.name "你的公开显示名"
-git config user.email "你的 GitHub noreply 邮箱"
+git status --short --branch
+git diff
 npm run verify
-git add .
-git status --short
-git diff --cached --stat
+git add README.md CONTENT_GUIDE.md
 git diff --cached
+git commit -m "Describe the change"
 ```
 
-确认暂存文件中没有 `.env`、`.dev.vars`、密钥、私人草稿、`node_modules` 或 `dist`。再提交并关联仓库：
+上面的文件名仅为示例，暂存时改为本次实际修改的文件。只提交本次已检查的改动；`.env`、令牌、依赖、构建产物与私人草稿不进入仓库。
+
+### 仓库所有者最终推送
+
+助手确认在 `main` 完成提交后，可先查看待发布内容：
 
 ```sh
-git commit -m "Initial commit: ByteDesk blog"
-git remote add origin https://github.com/YOUR_USERNAME/ByteDesk.git
-git remote -v
-git push -u origin main
+git status --short --branch
+git log --oneline origin/main..HEAD
+git diff --stat origin/main..HEAD
 ```
 
-推送前需要完成 GitHub 认证。可使用 GitHub Desktop 登录，或安装并登录 GitHub CLI 后执行 `gh auth setup-git`；不要把令牌写进仓库地址。当前检查到本机有 Git，命令行 PATH 中未找到 `gh`。流程依据 [GitHub 官方上传说明](https://docs.github.com/en/migrations/importing-source-code/using-the-command-line-to-import-source-code/adding-locally-hosted-code-to-github)。
+确认后执行：
 
-推送成功后，打开仓库 Actions 页确认 `verify` 通过；启用 CD 后还需要确认 `deploy` 通过。检查 README、文件清单和公开内容是否符合预期；首次部署后打开网站确认效果。
+```sh
+git push
+```
 
-## 日常更新
+本项目的本地 `main` 已跟踪 `origin/main`，因此可直接使用 `git push`。如果 Git 提示远端已有更新，先同步并处理冲突，再继续发布，不要强推覆盖远端。
+
+### 确认网站已更新
+
+1. 打开 [Actions → CI / CD](https://github.com/haoqianglyu/ByteDesk/actions/workflows/ci.yml)，确认最新运行的提交编号与本次提交一致。
+2. 等待 `verify` 和 `deploy` 均通过。检查失败会停止发布；若只有发布后的 HTTP 检查失败，新版本可能已经上线，需要查看部署日志。
+3. 打开 [中文首页](https://haoqianglyu.com/zh/) 或 [英文首页](https://haoqianglyu.com/en/)，核对实际改动；页面已打开时可用 macOS 的 `⌘⇧R` 强制刷新。
+
+日常更新无需再运行 `npm run deploy`。图片先单独上传 R2，Git 保存图片引用及来源说明。CD 的暂停开关、凭据维护、失败重试与回退见 [DEPLOYMENT.md](DEPLOYMENT.md)。
+
+## 使用分支和 PR
+
+较大改动可以在功能分支上完成：
 
 ```sh
 git switch -c feature/your-change
-# 编辑代码或文章
-npm run verify
-git add 需要提交的文件
-git diff --cached
-git commit -m "Describe the change"
+```
+
+助手检查并 commit 后，由仓库所有者执行首次推送：
+
+```sh
 git push -u origin feature/your-change
 ```
 
-在 GitHub 提交 PR，CI 通过后合并到 main。启用 CD 后，main 检查通过会自动更新 `https://haoqianglyu.com`，在 Actions 查看结果。图片依然单独上传 R2，Git 只保存公开图片引用及来源说明。
+将示例分支名替换为实际名称，再在 GitHub 创建 PR。单独推送功能分支不会触发当前工作流；创建或更新 PR 后运行 CI，PR 阶段不部署。仓库所有者确认并合并到 `main` 后，主分支流程才会自动上线。
 
-## 后续改进与上线
+## 新电脑继续开发
 
-| 优先级 | 事项 | 原因 |
+直接克隆现有仓库：
+
+```sh
+git clone https://github.com/haoqianglyu/ByteDesk.git
+cd ByteDesk
+npm ci
+npm run dev
+```
+
+使用 Node.js 24.x 和 npm 11 或更新版本。提交前设置自己的公开显示名及 GitHub noreply 邮箱，推送前配置与远端 URL 对应的认证：上面的 HTTPS 地址需要 GitHub 凭据；使用 SSH 密钥时将远端改为仓库的 SSH 地址。流程参考 [GitHub 官方说明](https://docs.github.com/en/get-started/git-basics/about-remote-repositories)。运行已有 CD 无需在新电脑复制 Cloudflare Token，它保存在 GitHub 的 `production` 环境 Secret 中。
+
+## 公开内容与待改进事项
+
+仓库尚未选定代码许可证；素材授权见 [ASSETS.md](ASSETS.md) 和 [ASSET_CREDITS.md](ASSET_CREDITS.md)。`draft: true` 只影响网站构建，公开仓库中的 Markdown 源码仍可被读取，私人草稿应存到仓库外。
+
+| 优先级 | 事项 | 说明 |
 | --- | --- | --- |
-| 正式上线前 | 填写个人介绍和真实文章，处理示例标记 | 当前仍以演示内容为主 |
-| 后续维护 | 部署凭据有效期与 Actions 发布结果 | 网站和 R2 已接入自定义域名；CD 需要有效凭据及启用开关 |
-| 正式上线前 | 手机真机手势、Safari、低性能设备和弱网检查 | 当前主要验证桌面浏览器与模拟尺寸 |
-| 后续优化 | 默认动态壁纸的加载、GPU 与电量开销 | Three.js 有大型共享模块，适合单独性能审计 |
-| 后续优化 | 图片缩略图、响应式图片和更多页面的断图状态 | 目前原图较大，旅行页面已经有失败重试 |
-| 后续优化 | 分享卡片的 og:image、og:url 和文章类型 | 当前只有基本标题和摘要 |
-| 后续维护 | 内容测试与示例数据解耦，补充关键交互回归测试 | 现有部分检查依赖示例文章和固定 RSS 数量，替换内容时需同步更新 |
+| 内容维护 | 填写个人介绍和真实文章，处理示例标记 | 写作与发布步骤见 [CONTENT_GUIDE.md](CONTENT_GUIDE.md) |
+| 内容维护 | 内容测试与示例数据解耦 | 当前断言依赖固定的 6 篇文章、示例路由和索引规则，增删文章时需同步调整 |
+| 体验验收 | 手机真机手势、Safari、低性能设备和弱网检查 | 当前主要验证桌面浏览器与模拟尺寸 |
+| 性能优化 | 动态壁纸加载、GPU 与电量开销 | Three.js 仍有大型共享模块提示 |
+| 性能优化 | 图片缩略图、响应式图片和更多页面的断图状态 | 当前保留原图，旅行页面已有失败重试 |
+| 展示优化 | 分享卡片的 og:image、og:url 和文章类型 | 当前只有基本标题和摘要 |
+| 定期维护 | 部署凭据有效期与 Actions 发布结果 | 当前网站和 R2 已接入自定义域名，令牌到期信息见部署说明 |
 
-2026-09-08 本地检查与全新临时副本均通过类型检查、38 页构建和 18 项测试；全新副本从 npm 官方源执行 `npm ci`，并用测试站点域名和图片域名验证正式构建。对上传范围进行了常见密钥格式扫描，未发现匹配；npm 官方依赖审计返回 0 个已知漏洞。这些结果仅代表本次检查，并不覆盖所有可能的敏感内容或未来依赖风险。
+## 已验证记录
+
+2026-09-09 的 [CI/CD 运行](https://github.com/haoqianglyu/ByteDesk/actions/runs/34302195318) 已完成类型检查、38 页构建、19 项测试、Wrangler 部署及线上页面检查。后续每次发布仍以对应提交的 Actions 结果为准。

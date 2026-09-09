@@ -2,25 +2,33 @@
 
 网站地址：[中文](https://haoqianglyu.com/zh/) · [English](https://haoqianglyu.com/en/)。
 
-本站使用 Workers Static Assets 托管 Astro 生成的 `dist` 目录，图片、项目截图和壁纸从 `https://img.haoqianglyu.com` 对应的 R2 桶 `bytedesk-images` 加载。没有引入服务端渲染或数据库。配置见 `wrangler.jsonc`。
+本站使用 Workers Static Assets 托管 Astro 生成的 `dist` 目录，图片、项目截图和壁纸从 `https://img.haoqianglyu.com` 对应的 R2 桶 `bytedesk-images` 加载。没有引入服务端渲染或数据库。配置见 [wrangler.jsonc](wrangler.jsonc)，自动部署流程见 [ci.yml](.github/workflows/ci.yml)。
 
 ## 更新网站
 
-日常修改提交到 GitHub，合并或推送到 `main` 后，Actions 的 **CI / CD** 流程按顺序执行：
+本仓库的 CD 已启用。日常协作由助手检查并完成 `git add`、`git commit`，仓库所有者执行最终的 `git push`，具体命令见 [Git 提交与发布流程](GIT_GUIDE.md)。合并或推送到 `main` 后，Actions 的 **CI / CD** 流程按顺序执行：
 
 1. 安装锁文件中的依赖，使用 `https://haoqianglyu.com` 构建，运行类型检查、测试和 Wrangler 部署预演。
 2. 保存已检查的 `dist`，由 `deploy` 下载同一次运行的产物，部署到 Worker `bytedesk`，无需再次构建。
 3. 检查线上中文首页、英文首页和 sitemap 能否访问。Workers 版本说明记录对应的 Git commit SHA。
 
-只有本仓库 `main` 的推送或手动运行能够部署；PR 只检查。正在运行的 main 流程会执行完，新提交等待；PR 的过时检查会取消。构建产物保留 7 天，超过期限需要重新运行整个流程。
+只有本仓库 `main` 的推送或手动运行能够部署；PR 只检查，其他分支单独 push 不触发该工作流。正在运行的 main 流程会执行完；连续推送时，后来的提交可能替换尚未开始的排队运行，各次发布仍需先通过检查，规则见 [GitHub 并发说明](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency)。PR 的过时检查会取消。构建产物保留 7 天，超过期限需要重新运行整个流程。
 
-### 首次启用自动部署
+### 当前配置与凭据保存位置
 
 本仓库已于 2026-09-09 启用 CD：`production` 环境只允许 `main` 分支，部署令牌保存在环境 Secret `CLOUDFLARE_API_TOKEN`，仓库变量 `CLOUDFLARE_CD_ENABLED=true`。Cloudflare 账号令牌名称为 `ByteDesk GitHub Actions`，仅包含 Workers Scripts 编辑权限，到期时间为 **2027-09-09 23:59:59 UTC**（北京时间 2027-09-10 07:59:59）。到期前更换令牌并更新该 Secret。
 
-自动部署默认关闭，需要仓库管理员完成以下配置：
+- **GitHub**：[Settings → Environments → production](https://github.com/haoqianglyu/ByteDesk/settings/environments/21528306755/edit) → Environment secrets → `CLOUDFLARE_API_TOKEN`。保存后只能查看名称、更新时间，不能读回明文值；更换时编辑 Secret 并填入新 Token。
+- **Cloudflare**：账号首页 → Manage account → Account API tokens → `ByteDesk GitHub Actions`。这里管理权限、有效期和撤销；Token 明文仅在创建完成时展示。
+- **发布开关**：[Settings → Secrets and variables → Actions → Variables](https://github.com/haoqianglyu/ByteDesk/settings/variables/actions) → `CLOUDFLARE_CD_ENABLED`，当前为 `true`。
 
-1. 在 Cloudflare 创建专用 API Token，例如 `ByteDesk GitHub Actions`。将账号范围限制为 `wrangler.jsonc` 中的账号，权限使用 **Account → Workers Scripts → Edit**。该权限覆盖指定账号的 Workers，并非仅限一个 Worker；本流程不需要 DNS、R2 或 VPN 权限。设置合理有效期，到期前更换。
+首次完整发布已于 2026-09-09 验证通过：[CI/CD 运行记录](https://github.com/haoqianglyu/ByteDesk/actions/runs/34302195318)。后续更新以对应提交的 Actions 结果为准。
+
+### 重新配置或迁移账号
+
+当前仓库无需重复初始化。复制项目、迁移账号或重新配置时，按以下步骤处理；未设置开关的仓库默认不自动部署：
+
+1. 在 Cloudflare 的 **Manage account → Account API tokens** 创建专用 API Token，例如 `ByteDesk GitHub Actions`。将账号范围限制为 `wrangler.jsonc` 中的账号，权限只选择 **Workers Scripts → Edit**。该权限覆盖指定账号的 Workers，并非仅限一个 Worker；本流程不需要 DNS 或 R2 管理权限。设置合理有效期，到期前更换。创建完成后复制 **Your API Token** 字段，旁边的 **Account ID** 是账号标识，不能作为部署令牌。
 2. GitHub 仓库 **Settings → Environments** 创建 `production`，将允许部署的分支限定为 `main`；在这个环境的 Secrets 中添加 `CLOUDFLARE_API_TOKEN`。密钥只会传给部署步骤，不写入源码或构建产物。
 3. 在 **Settings → Secrets and variables → Actions → Variables** 添加仓库变量 `CLOUDFLARE_CD_ENABLED`，值设为 `true`。账号 ID 已在 `wrangler.jsonc` 中固定，无需另存密钥。
 4. 打开 [Actions](https://github.com/haoqianglyu/ByteDesk/actions/workflows/ci.yml)，选择 **Run workflow → main**。确认 `verify` 和 `deploy` 均通过，再访问网站。
@@ -30,14 +38,14 @@
 ### 失败、暂停和回退
 
 - `verify` 失败：不会执行部署，修复后重新推送。
-- `deploy` 失败：查看 Actions 对应步骤的错误。若仅上线后的 HTTP 检查失败，新版本可能已经发布，需要结合 Workers 的部署记录确认。
+- `deploy` 失败：查看 Actions 对应步骤的错误。凭据修正后可重跑失败的 `deploy` 作业，复用同次运行保留的构建产物。若仅上线后的 HTTP 检查失败，新版本可能已经发布，需要结合 Workers 的部署记录确认。
 - 暂停发布：将仓库变量 `CLOUDFLARE_CD_ENABLED` 改为 `false`。该开关影响后续运行，不能中止已经开始的部署。
 - 回退：优先用 `git revert <有问题的提交>` 生成回退提交并推送 `main`，CI 通过后自动发布。不要强推改写 main 历史。
 - 凭据到期或撤销：更换 `production` 环境中的 Secret，随后重新运行流程。不要将本机 Wrangler 登录文件上传到 GitHub。
 
 ### 从本机部署
 
-需要手动发布时，在项目目录运行：
+日常推送 `main` 已会自动发布，无需另跑本机部署。需要手动发布时，由负责最终上线的人在项目目录运行：
 
 ```sh
 npm run deploy
@@ -59,7 +67,7 @@ npm exec -- wrangler login --scopes account:read user:read workers_scripts:write
 npm run deploy -- --dry-run
 ```
 
-自动部署不会上传图片或改变 R2 桶、域名 DNS、VPN 配置。新增素材仍按 [内容更新说明](CONTENT_GUIDE.md) 单独上传。
+自动部署只上传网站构建产物；新增素材仍按 [内容更新说明](CONTENT_GUIDE.md) 单独上传 R2，图片桶和 DNS 在 Cloudflare 控制台管理。
 
 ## 域名和图片配置
 
@@ -73,7 +81,7 @@ R2 自定义域名 `img.haoqianglyu.com` 连接到现有公开图片桶。`R2_IM
 
 Workers 默认地址继续可用，提供同一份正式构建，其 canonical 指向主域名。如果使用 `*.workers.dev`、`*.pages.dev` 或本地地址作为 `SITE_URL` 单独构建预览包，则自动禁止搜索收录。`noindex` 不提供访问控制。
 
-Pages 对比测试尚未部署；新域名目前连接的是原有 Workers 网站。自定义域名是否改善大陆直连，需要用大陆网络关闭代理后实测。
+当前正式域名连接 Workers，没有部署 Pages 版本。大陆直连表现需要通过不同网络实测。
 
 路由使用与 Astro 一致的结尾斜杠；不存在的页面返回自定义 `404.html` 和 HTTP 404。
 
