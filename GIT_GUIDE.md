@@ -1,12 +1,12 @@
 # ByteDesk 上传 GitHub
 
-公开仓库：[haoqianglyu/ByteDesk](https://github.com/haoqianglyu/ByteDesk)。本文保留首次上传与日常更新的操作说明；仓库已经初始化或关联远端时，跳过对应的初始化步骤。上传源码和部署网站是两个步骤。网站已部署到 Cloudflare，当前 CI 检查代码和部署包；更新线上网站使用 `npm run deploy`，详见 [部署说明](DEPLOYMENT.md)。
+公开仓库：[haoqianglyu/ByteDesk](https://github.com/haoqianglyu/ByteDesk)。本文保留首次上传与日常更新的操作说明；仓库已经初始化或关联远端时，跳过对应的初始化步骤。网站部署在 Cloudflare Workers。配置凭据并启用 CD 后，推送 main 会先检查，再自动部署；首次配置见 [部署说明](DEPLOYMENT.md)。
 
 ## 已完成的准备
 
 - `.gitignore` 排除依赖、构建产物、Astro/Cloudflare 缓存、环境配置和本机文件。
 - `.nvmrc` 与 `package.json` 约定 Node.js 24，锁文件统一使用 npm 官方源，保留依赖版本和完整性校验值。
-- `.github/workflows/ci.yml` 使用只读仓库权限，执行安装、类型检查、构建与测试。
+- `.github/workflows/ci.yml` 使用只读仓库权限，执行安装、类型检查、构建与测试；启用 CD 后，main 自动部署同一份已验证产物。
 - 图片域名统一配置；本地预览与正式构建的搜索索引规则共用一处判断。
 - README 已整理，历史实现记录保留在 `docs/DEVELOPMENT.md`，移除了本机路径、任务 ID 和工具连接状态。
 
@@ -45,7 +45,7 @@ git push -u origin main
 
 推送前需要完成 GitHub 认证。可使用 GitHub Desktop 登录，或安装并登录 GitHub CLI 后执行 `gh auth setup-git`；不要把令牌写进仓库地址。当前检查到本机有 Git，命令行 PATH 中未找到 `gh`。流程依据 [GitHub 官方上传说明](https://docs.github.com/en/migrations/importing-source-code/using-the-command-line-to-import-source-code/adding-locally-hosted-code-to-github)。
 
-推送成功后，打开仓库 Actions 页确认 CI 通过；检查 README、文件清单和公开内容是否符合预期。GitHub Actions 已在远端成功运行；每次提交仍需查看对应的检查结果。
+推送成功后，打开仓库 Actions 页确认 `verify` 通过；启用 CD 后还需要确认 `deploy` 通过。检查 README、文件清单和公开内容是否符合预期；首次部署后打开网站确认效果。
 
 ## 日常更新
 
@@ -59,14 +59,14 @@ git commit -m "Describe the change"
 git push -u origin feature/your-change
 ```
 
-在 GitHub 提交 PR，CI 通过后合并到 main。图片依然单独上传 R2，Git 只保存公开图片引用及来源说明。
+在 GitHub 提交 PR，CI 通过后合并到 main。启用 CD 后，main 检查通过会自动更新 `https://haoqianglyu.com`，在 Actions 查看结果。图片依然单独上传 R2，Git 只保存公开图片引用及来源说明。
 
 ## 后续改进与上线
 
 | 优先级 | 事项 | 原因 |
 | --- | --- | --- |
 | 正式上线前 | 填写个人介绍和真实文章，处理示例标记 | 当前仍以演示内容为主 |
-| 正式上线前 | 正式站点域名、R2 图片域名 | Workers 预览已部署；仅上传 GitHub 不会自动更新网站 |
+| 后续维护 | 部署凭据有效期与 Actions 发布结果 | 网站和 R2 已接入自定义域名；CD 需要有效凭据及启用开关 |
 | 正式上线前 | 手机真机手势、Safari、低性能设备和弱网检查 | 当前主要验证桌面浏览器与模拟尺寸 |
 | 后续优化 | 默认动态壁纸的加载、GPU 与电量开销 | Three.js 有大型共享模块，适合单独性能审计 |
 | 后续优化 | 图片缩略图、响应式图片和更多页面的断图状态 | 目前原图较大，旅行页面已经有失败重试 |

@@ -31,7 +31,7 @@ npm run verify   # 类型检查、生产构建、测试
 npm run preview  # 预览 dist，先运行 build
 ```
 
-依赖版本由 `package-lock.json` 固定；`.npmrc` 使用 npm 官方下载源。GitHub Actions 会在推送 main 或提交 PR 后执行依赖安装、`npm run verify` 和 Wrangler 部署包检查，不自动部署网站，也不需要 Cloudflare 密钥。更新线上网站使用 `npm run deploy`，详见 [部署说明](DEPLOYMENT.md)。
+依赖版本由 `package-lock.json` 固定；`.npmrc` 使用 npm 官方下载源。GitHub Actions 会在推送 main 或提交 PR 后执行依赖安装、`npm run verify` 和 Wrangler 部署包检查。配置部署凭据并启用 CD 后，main 检查通过会自动把已验证的构建产物部署到 Cloudflare Workers；PR 只运行检查。本机也可用 `npm run deploy` 更新，首次配置和暂停方式见 [部署说明](DEPLOYMENT.md)。
 
 ## 配置
 

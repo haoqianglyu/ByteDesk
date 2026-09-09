@@ -1,4 +1,4 @@
-name: CI
+name: CI / CD
 
 on:
   push:
@@ -11,16 +11,18 @@ permissions:
 
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  # Finish an active production deployment before starting the next main run.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  ASTRO_TELEMETRY_DISABLED: '1'
+  WRANGLER_SEND_METRICS: 'false'
+  SITE_URL: https://haoqianglyu.com
 
 jobs:
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    env:
-      ASTRO_TELEMETRY_DISABLED: '1'
-      WRANGLER_SEND_METRICS: 'false'
-      SITE_URL: http://localhost:4321
     steps:
       - uses: actions/checkout@v7
         with:
@@ -31,4 +33,56 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run verify
-      - run: npm exec -- wrangler deploy --dry-run
+      - run: npm exec -- wrangler deploy --dry-run --no-autoconfig
+      - name: Save verified site
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: site-${{ github.sha }}
+          path: dist/
+          if-no-files-found: error
+          retention-days: 7
+          overwrite: true
+
+  deploy:
+    needs: verify
+    if: >-
+      github.repository == 'haoqianglyu/ByteDesk' &&
+      github.ref == 'refs/heads/main' &&
+      github.event_name != 'pull_request' &&
+      vars.CLOUDFLARE_CD_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: production
+      url: https://haoqianglyu.com
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Download verified site
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: site-${{ github.sha }}
+          path: dist/
+      - name: Deploy to Cloudflare Workers
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            echo '::error::Set CLOUDFLARE_API_TOKEN in the production environment before enabling CD.'
+            exit 1
+          fi
+          npm exec -- wrangler deploy --no-autoconfig --message "$GITHUB_SHA"
+      - name: Check live pages
+        run: |
+          for path in /zh/ /en/ /sitemap.xml; do
+            curl --fail --silent --show-error --location \
+              --retry 3 --retry-all-errors --retry-delay 5 --max-time 30 \
+              --output /dev/null "${SITE_URL}${path}"
+          done

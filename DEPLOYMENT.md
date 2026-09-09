@@ -6,7 +6,36 @@
 
 ## 更新网站
 
-在项目目录运行：
+日常修改提交到 GitHub，合并或推送到 `main` 后，Actions 的 **CI / CD** 流程按顺序执行：
+
+1. 安装锁文件中的依赖，使用 `https://haoqianglyu.com` 构建，运行类型检查、测试和 Wrangler 部署预演。
+2. 保存已检查的 `dist`，由 `deploy` 下载同一次运行的产物，部署到 Worker `bytedesk`，无需再次构建。
+3. 检查线上中文首页、英文首页和 sitemap 能否访问。Workers 版本说明记录对应的 Git commit SHA。
+
+只有本仓库 `main` 的推送或手动运行能够部署；PR 只检查。正在运行的 main 流程会执行完，新提交等待；PR 的过时检查会取消。构建产物保留 7 天，超过期限需要重新运行整个流程。
+
+### 首次启用自动部署
+
+自动部署默认关闭，需要仓库管理员完成以下配置：
+
+1. 在 Cloudflare 创建专用 API Token，例如 `ByteDesk GitHub Actions`。将账号范围限制为 `wrangler.jsonc` 中的账号，权限使用 **Account → Workers Scripts → Edit**。该权限覆盖指定账号的 Workers，并非仅限一个 Worker；本流程不需要 DNS、R2 或 VPN 权限。设置合理有效期，到期前更换。
+2. GitHub 仓库 **Settings → Environments** 创建 `production`，将允许部署的分支限定为 `main`；在这个环境的 Secrets 中添加 `CLOUDFLARE_API_TOKEN`。密钥只会传给部署步骤，不写入源码或构建产物。
+3. 在 **Settings → Secrets and variables → Actions → Variables** 添加仓库变量 `CLOUDFLARE_CD_ENABLED`，值设为 `true`。账号 ID 已在 `wrangler.jsonc` 中固定，无需另存密钥。
+4. 打开 [Actions](https://github.com/haoqianglyu/ByteDesk/actions/workflows/ci.yml)，选择 **Run workflow → main**。确认 `verify` 和 `deploy` 均通过，再访问网站。
+
+开关未设置或不是 `true` 时，CI 照常运行，`deploy` 显示 skipped。复制或 fork 本项目时，还需要修改工作流中的仓库限制、正式网址及 Wrangler 配置，再配置自己账号的凭据。
+
+### 失败、暂停和回退
+
+- `verify` 失败：不会执行部署，修复后重新推送。
+- `deploy` 失败：查看 Actions 对应步骤的错误。若仅上线后的 HTTP 检查失败，新版本可能已经发布，需要结合 Workers 的部署记录确认。
+- 暂停发布：将仓库变量 `CLOUDFLARE_CD_ENABLED` 改为 `false`。该开关影响后续运行，不能中止已经开始的部署。
+- 回退：优先用 `git revert <有问题的提交>` 生成回退提交并推送 `main`，CI 通过后自动发布。不要强推改写 main 历史。
+- 凭据到期或撤销：更换 `production` 环境中的 Secret，随后重新运行流程。不要将本机 Wrangler 登录文件上传到 GitHub。
+
+### 从本机部署
+
+需要手动发布时，在项目目录运行：
 
 ```sh
 npm run deploy
@@ -28,7 +57,7 @@ npm exec -- wrangler login --scopes account:read user:read workers_scripts:write
 npm run deploy -- --dry-run
 ```
 
-GitHub CI 会验证代码、构建和部署配置。当前推送 GitHub **不会自动更新线上网站**；上线需运行 `npm run deploy`。后续可再连接自动部署。
+自动部署不会上传图片或改变 R2 桶、域名 DNS、VPN 配置。新增素材仍按 [内容更新说明](CONTENT_GUIDE.md) 单独上传。
 
 ## 域名和图片配置
 
@@ -46,4 +75,4 @@ Pages 对比测试尚未部署；新域名目前连接的是原有 Workers 网�
 
 路由使用与 Astro 一致的结尾斜杠；不存在的页面返回自定义 `404.html` 和 HTTP 404。
 
-参考：[Astro 静态站部署](https://developers.cloudflare.com/workers/framework-guides/web-apps/astro/)、[静态页面路由](https://developers.cloudflare.com/workers/static-assets/routing/static-site-generation/)。
+参考：[Astro 静态站部署](https://developers.cloudflare.com/workers/framework-guides/web-apps/astro/)、[GitHub Actions 部署](https://developers.cloudflare.com/workers/ci-cd/external-cicd/github-actions/)、[静态页面路由](https://developers.cloudflare.com/workers/static-assets/routing/static-site-generation/)。
