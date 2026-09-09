@@ -4,10 +4,46 @@ ByteDesk 使用 Waline。前端随博客构建；后端单独存放在私有仓�
 
 ## 访问入口
 
-- 评论管理：<https://bytedesk-comments.vercel.app/ui>
-- 首次管理员注册：<https://bytedesk-comments.vercel.app/ui/register>（第一个注册的账户成为管理员）
+- 评论管理：<https://comments.haoqianglyu.com/ui>
+- 评论服务：<https://comments.haoqianglyu.com>
 - 后端环境变量：<https://vercel.com/bytedesk/bytedesk-comments/settings/environment-variables>
 - 数据库连接：<https://vercel.com/bytedesk/bytedesk-comments/stores>
+
+管理员账户已创建，使用原来的 Waline 邮箱和密码登录即可；无需重新注册，也无需 GitHub 账户。切换到新域名后，浏览器可能需要重新登录。原来的 `bytedesk-comments.vercel.app` 地址仍连接同一个后端和数据库。
+
+## 一条评论如何完成
+
+1. 访客打开 Cloudflare 托管的文章页面，在评论区填写昵称和内容；邮箱可选。
+2. 浏览器把留言发送到 `comments.haoqianglyu.com`，由 Vercel 上的 Waline 校验并写入 Neon 数据库。
+3. 新的游客留言进入“待审核”，Waline 通过 Gmail SMTP 给管理员发送新评论通知。
+4. 管理员在后台审核通过后，留言才会出现在文章下方；中英文版本读取同一组评论。
+5. 管理员在后台或文章评论区回复。填写了有效邮箱的访客可收到回复通知；未填写邮箱的访客仍可回到文章查看回复。
+
+评论保存在数据库中，审核、回复和删除直接通过后台处理，不需要提交 Git 或重新部署博客。发送邮件失败不会自动删除已保存的评论。
+
+## 日常管理
+
+| 要做什么 | 操作 |
+| --- | --- |
+| 审核留言 | 登录管理后台，打开“待审核”，查看内容后点击“通过” |
+| 回复留言 | 找到对应评论，点击“回复”；使用管理员账户可以识别作者身份 |
+| 处理广告或垃圾内容 | 标记为“垃圾”；确认确实不需要的内容再删除 |
+| 修改留言 | 使用评论的“编辑”操作，保存后检查展示结果 |
+| 备份评论 | 在“导入 / 导出”中导出数据，保存在私人位置；迁移或批量操作前先备份 |
+| 修改管理员资料 | 通过右上角账户入口修改昵称、邮箱等资料 |
+| 排查通知未收到 | 先检查收件箱与垃圾邮件，再检查 Vercel 运行日志和 SMTP 环境变量；更新变量后重新部署 |
+
+导出文件可能包含访客邮箱等非公开信息，不应提交到公开 Git 仓库。日常评论管理使用 Waline 后台即可，Neon 控制台主要用于数据库维护与排障。
+
+## 自定义域名
+
+Vercel 项目把 `comments.haoqianglyu.com` 连接到 Production。Cloudflare DNS 使用以下记录：
+
+| 类型 | 名称 | 目标 | 代理 | TTL |
+| --- | --- | --- | --- | --- |
+| CNAME | `comments` | `3965ae578e17da4d.vercel-dns-017.com` | DNS only | Auto |
+
+HTTPS 证书由 Vercel 管理。DNS 仍在 Cloudflare，评论后端仍在 Vercel。以后迁移托管平台时，可以保留这个子域名，按新平台要求调整 DNS，并迁移评论数据。新的 CNAME 目标始终以 Vercel Domains 页面实际提供的值为准。
 
 ## 访客体验
 

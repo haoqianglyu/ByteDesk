@@ -46,7 +46,7 @@ npm run preview  # 预览 dist，先运行 build
 | --- | --- |
 | `SITE_URL` | 网站完整地址；默认是本地预览。正式构建设置真实 HTTPS 域名。 |
 | `PUBLIC_IMAGE_BASE_URL` | 照片、应用截图与地球/篝火壁纸共用的公开图片地址。默认使用 `https://img.haoqianglyu.com`。 |
-| `PUBLIC_WALINE_SERVER_URL` | 可选，覆盖默认评论 API 地址；数据库与邮件密钥仅保存在后端。 |
+| `PUBLIC_WALINE_SERVER_URL` | 可选，覆盖默认的 `https://comments.haoqianglyu.com`；数据库与邮件密钥仅保存在后端。 |
 
 `PUBLIC_` 变量会出现在浏览器端，不能用于保存密钥。项目无需 R2 写入凭据即可本地构建；上传图片时单独管理凭据。本地 `.env`、`.dev.vars`、依赖、构建产物及运行缓存已加入 `.gitignore`。
 
