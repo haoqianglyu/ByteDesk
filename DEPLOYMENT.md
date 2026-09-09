@@ -16,6 +16,8 @@
 
 ### 首次启用自动部署
 
+本仓库已于 2026-09-09 启用 CD：`production` 环境只允许 `main` 分支，部署令牌保存在环境 Secret `CLOUDFLARE_API_TOKEN`，仓库变量 `CLOUDFLARE_CD_ENABLED=true`。Cloudflare 账号令牌名称为 `ByteDesk GitHub Actions`，仅包含 Workers Scripts 编辑权限，到期时间为 **2027-09-09 23:59:59 UTC**（北京时间 2027-09-10 07:59:59）。到期前更换令牌并更新该 Secret。
+
 自动部署默认关闭，需要仓库管理员完成以下配置：
 
 1. 在 Cloudflare 创建专用 API Token，例如 `ByteDesk GitHub Actions`。将账号范围限制为 `wrangler.jsonc` 中的账号，权限使用 **Account → Workers Scripts → Edit**。该权限覆盖指定账号的 Workers，并非仅限一个 Worker；本流程不需要 DNS、R2 或 VPN 权限。设置合理有效期，到期前更换。
