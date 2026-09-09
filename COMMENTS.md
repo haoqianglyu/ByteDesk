@@ -52,7 +52,22 @@ HTTPS 证书由 Vercel 管理。DNS 仍在 Cloudflare，评论后端仍在 Verce
 
 评论使用 `/zh/posts/<translationKey>/` 作为稳定标识，因此中英文文章共享评论，通知中的文章链接也可以正常访问。修改 `translationKey` 会产生新的评论区；文章发表后应保持此字段不变。
 
-当前使用 `COMMENT_AUDIT=false`，正常的新评论提交后直接显示。邮箱不会展示给其他访客。前端不启用图片上传、表情搜索和浏览量统计。需要恢复发布前审核时，将 `COMMENT_AUDIT` 改为 `true` 并重新部署后端，同时恢复中英文评论区的审核提示。
+当前使用 `COMMENT_AUDIT=false`，正常的新评论提交后直接显示。邮箱不会展示给其他访客。前端不启用图片上传、表情搜索和浏览量统计。
+
+## 发布审核开关
+
+这个开关位于 [Vercel → bytedesk-comments → Environment Variables](https://vercel.com/bytedesk/bytedesk-comments/settings/environment-variables)，变量名为 `COMMENT_AUDIT`。Waline 管理后台用于处理具体留言；发布前审核规则通过这个服务端环境变量设置。
+
+| 值 | 新评论的默认行为 |
+| --- | --- |
+| `false`（当前设置，也是未配置时的默认值） | 正常留言保存后直接公开 |
+| `true` | 先进入“待审核”，管理员通过后才公开 |
+
+修改步骤：搜索 `COMMENT_AUDIT` → 行右侧 **⋯ → Edit** → 在 **Value** 填入 `true` 或 `false` → **Save → Redeploy**，选择 **Production**。新部署显示 **Ready** 后，再提交留言验证。详见 [Waline 服务端环境变量](https://waline.js.org/reference/server/env.html)。
+
+当前项目中的这个变量以 **Secret** 类型保存，因此重新打开编辑界面时，**Value 会留空，不回显已保存的值**。不能据此判断变量未配置或值为空；需要更改时输入完整的新值，不修改时点击 **Cancel**。普通开关在新建时可使用 **Config** 类型便于查看，数据库密码和 `SMTP_PASS` 等凭据应使用 **Secret**。
+
+恢复发布前审核时，也需要在 `src/components/ArticleComments.vue` 中补回中英文审核提示，并发布博客前端。关闭审核只影响新评论的默认状态，已有留言仍可在后台逐条管理。
 
 ## 邮件通知
 
@@ -80,3 +95,5 @@ HTTPS 证书由 Vercel 管理。DNS 仍在 Cloudflare，评论后端仍在 Verce
 本地与线上默认连接同一评论数据库。验收时可以发布带有“测试”字样的留言，确认无需人工审核即可公开、中英文页面共享以及后台管理功能，最后清理测试留言。
 
 前端改动运行 `npm run verify` 后按照 [提交与发布流程](GIT_GUIDE.md)提交，由仓库所有者推送。后端仓库推送到 `main` 时由 Vercel 自动部署。修改后端环境变量或数据库连接后，需要在 Vercel 重新部署才能生效。
+
+2026-09-09 已验证：评论子域名与管理后台通过 HTTPS 访问，游客测试留言提交后返回 `approved` 并可从公开接口读取，邮件发送测试获得 Gmail 的 `250 OK` 响应。中英文评论提示已移除“审核后显示”，对应代码通过类型检查、38 页构建和 19 项测试。后续配置变化应重新检查对应行为。

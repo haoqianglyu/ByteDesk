@@ -2,7 +2,7 @@
 
 网站地址：[中文](https://haoqianglyu.com/zh/) · [English](https://haoqianglyu.com/en/)。
 
-本站使用 Workers Static Assets 托管 Astro 生成的 `dist` 目录，图片、项目截图和壁纸从 `https://img.haoqianglyu.com` 对应的 R2 桶 `bytedesk-images` 加载。没有引入服务端渲染或数据库。配置见 [wrangler.jsonc](wrangler.jsonc)，自动部署流程见 [ci.yml](.github/workflows/ci.yml)。
+本站使用 Workers Static Assets 托管 Astro 生成的静态 `dist` 目录，图片、项目截图和壁纸从 `https://img.haoqianglyu.com` 对应的 R2 桶 `bytedesk-images` 加载。配置见 [wrangler.jsonc](wrangler.jsonc)，自动部署流程见 [ci.yml](.github/workflows/ci.yml)。评论通过独立的 Waline 服务读写 Neon 数据库，维护方式见 [评论管理](COMMENTS.md)。
 
 ## 更新网站
 
@@ -84,5 +84,13 @@ Workers 默认地址继续可用，提供同一份正式构建，其 canonical �
 当前正式域名连接 Workers，没有部署 Pages 版本。大陆直连表现需要通过不同网络实测。
 
 路由使用与 Astro 一致的结尾斜杠；不存在的页面返回自定义 `404.html` 和 HTTP 404。
+
+## 评论服务的更新
+
+`comments.haoqianglyu.com` 的 DNS 由 Cloudflare 管理，指向 Vercel 上的 `bytedesk-comments` 项目；评论数据保存在 Neon。该域名的 HTTPS 和 Production 部署由 Vercel 管理，具体 DNS 记录、后台入口和配置步骤见 [评论管理](COMMENTS.md)。
+
+- 评论前端与提示文字：修改本仓库后按正常 Git 流程发布，默认服务地址在 `src/lib/comments.ts`。
+- 审核规则与邮件配置：在 Vercel 环境变量中修改并重新部署评论后端。当前 `COMMENT_AUDIT=false`，正常的新留言直接公开；SMTP 密码与数据库凭据只保存在后端。
+- 日常回复、审核、标记垃圾和删除：在 Waline 管理后台操作，直接更新数据库，无需重新部署网站或评论后端。
 
 参考：[Astro 静态站部署](https://developers.cloudflare.com/workers/framework-guides/web-apps/astro/)、[GitHub Actions 部署](https://developers.cloudflare.com/workers/ci-cd/external-cicd/github-actions/)、[静态页面路由](https://developers.cloudflare.com/workers/static-assets/routing/static-site-generation/)。
