@@ -80,7 +80,7 @@ onUnmounted(() => { disposed = true; instance?.destroy(); });
  margin-top: 32px;
  padding-top: 28px;
  border-top: 1px solid var(--line);
- --waline-font-size: 14px;
+ --waline-font-size: 16px;
  --waline-theme-color: var(--accent);
  --waline-active-color: var(--accent);
  --waline-color: var(--text);
@@ -101,6 +101,9 @@ onUnmounted(() => { disposed = true; instance?.destroy(); });
 .comments-status { padding: 22px 0; font-size: 13px; color: var(--muted); }
 .comments-status button { margin-top: 12px; color: var(--accent); text-decoration: underline; }
 .comments-widget { min-width: 0; }
+.comments-widget :deep(.wl-header label) { font-size: 14px; }
+.comments-widget :deep(.wl-header input),
+.comments-widget :deep(.wl-editor) { font-family: inherit; font-size: 16px; line-height: 1.75; }
 .comments-widget :deep(textarea:focus-visible) { outline: 2px solid var(--accent); outline-offset: -2px; }
 .comments-widget :deep(.wl-power) { font-size: 11px; }
 </style>
