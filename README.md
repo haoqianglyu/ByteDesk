@@ -33,13 +33,9 @@ npm run preview  # 预览 dist，先运行 build
 
 依赖版本由 `package-lock.json` 固定；`.npmrc` 使用 npm 官方下载源。当前文章使用 `.md` 文件，尚未接入 MDX。
 
-## 发布更新
+## 部署
 
-本仓库已启用 GitHub Actions CI/CD：**推送或合并到 `main` → 检查、构建和测试 → 自动部署 Cloudflare Workers → 检查线上页面**。PR 只检查，不发布。
-
-日常协作由助手检查改动、执行 `git add` 和 `git commit`，由仓库所有者执行最终的 `git push`。只保存在本地或完成 commit 尚未上线；推送后到 [Actions](https://github.com/haoqianglyu/ByteDesk/actions/workflows/ci.yml) 确认 `verify`、`deploy` 都通过，再访问正式网站。新增照片仍单独上传 R2。
-
-具体操作见 [Git 提交与发布流程](GIT_GUIDE.md)；部署凭据、暂停、失败重试和手动发布见 [部署说明](DEPLOYMENT.md)。复制或 fork 本仓库时，需要为自己的账号重新配置 CD。
+网站通过 GitHub Actions 自动检查、构建并部署到 Cloudflare Workers。配置与维护方式见 [部署说明](DEPLOYMENT.md)。
 
 ## 配置
 
