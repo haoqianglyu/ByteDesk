@@ -2,6 +2,8 @@
 import { render } from 'astro:content';
 import Base from '../../../layouts/Base.astro';
 import ArticleEnhancements from '../../../components/ArticleEnhancements.vue';
+import ArticleComments from '../../../components/ArticleComments.vue';
+import { commentsServerURL } from '../../../lib/comments';
 import { publishedPosts, imageUrl, type Post } from '../../../lib/content';
 import { locales, ui, dateLabel, type Locale } from '../../../lib/i18n';
 export async function getStaticPaths() {
@@ -29,6 +31,7 @@ const missing = locale !== data.locale;
   <div class="article-body-grid"><div class="prose" lang={data.locale === 'zh' ? 'zh-CN' : 'en'}><Content/></div><aside class="article-toc" aria-label={t.toc}><span>{t.toc}</span>{headings.filter(h => h.depth === 2).map(h => <a href={`#${h.slug}`}>{h.text}</a>)}</aside></div>
   <div class="article-tags" aria-label={t.tags}>{data.tags.map(tag => <a href={`/${locale}/category/${data.category}/?tag=${encodeURIComponent(tag)}`}># {tag}</a>)}</div>
   <div class="article-end"><span>{t.footer}</span><a href={`/${locale}/category/${data.category}/`}>{t.next} →</a></div>
+  {commentsServerURL && <ArticleComments client:visible={{ rootMargin: '300px' }} locale={locale} translationKey={data.translationKey} serverURL={commentsServerURL}/>}
  </article>
  <ArticleEnhancements client:load locale={locale}/>
 </Base>

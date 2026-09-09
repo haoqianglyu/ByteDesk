@@ -11,6 +11,7 @@
 - 可拖动、缩放、收起和全屏阅读的桌面窗口，支持手机布局。
 - 中英文、浅色/深色/跟随系统、全站搜索、分类和标签。
 - Markdown 文章、目录、代码高亮与复制、图片查看、RSS 和 sitemap。
+- Waline 文章评论：支持游客留言、中英文共用评论、审核后台和邮件通知配置。
 - 旅行地图、地点聚合、同地点多篇游记、图片加载失败重试。
 - 实验室、项目展示、Zoji 应用截图与交互式手机模型。
 - 太阳系、地球日夜景和篝火动态壁纸，支持暂停与减少动态效果。
@@ -45,6 +46,7 @@ npm run preview  # 预览 dist，先运行 build
 | --- | --- |
 | `SITE_URL` | 网站完整地址；默认是本地预览。正式构建设置真实 HTTPS 域名。 |
 | `PUBLIC_IMAGE_BASE_URL` | 照片、应用截图与地球/篝火壁纸共用的公开图片地址。默认使用 `https://img.haoqianglyu.com`。 |
+| `PUBLIC_WALINE_SERVER_URL` | 可选，覆盖默认评论 API 地址；数据库与邮件密钥仅保存在后端。 |
 
 `PUBLIC_` 变量会出现在浏览器端，不能用于保存密钥。项目无需 R2 写入凭据即可本地构建；上传图片时单独管理凭据。本地 `.env`、`.dev.vars`、依赖、构建产物及运行缓存已加入 `.gitignore`。
 
@@ -68,6 +70,7 @@ tests/             几何、路由、图片、SEO 等检查
 - [内容更新与图片管理](CONTENT_GUIDE.md)
 - [Git 提交、发布流程与待改进事项](GIT_GUIDE.md)
 - [Cloudflare 部署与网站更新](DEPLOYMENT.md)
+- [评论管理与邮件通知](COMMENTS.md)
 - [设计与开发记录](docs/DEVELOPMENT.md)
 - [示例素材来源](ASSETS.md)、[地图与壁纸素材说明](ASSET_CREDITS.md)
 - [R2 素材清单](R2_IMAGES.json)、[篝火生成提示](CAMPFIRE_PROMPTS.md)
