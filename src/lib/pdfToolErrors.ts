@@ -14,16 +14,15 @@ export function pdfToolFailureKind(error: unknown): 'resource' | 'compatibility'
  return 'unknown';
 }
 
-// PDF.js's legacy build does not polyfill all browser APIs. Check its essential
-// native requirements before importing the scanner, so an older engine gets an
-// actionable error instead of failing while parsing/evaluating a lazy module.
+// Run after the compatibility modules load. Keep an actionable error for missing
+// platform capabilities (Worker, WebAssembly, canvas), which we cannot polyfill.
 export function assertPdfBrowserSupport() {
  const required: [string, unknown][] = [
   ['Promise.withResolvers', Promise.withResolvers],
   ['Array.prototype.at', Array.prototype.at],
   ['Array.prototype.findLast', Array.prototype.findLast],
   ['structuredClone', globalThis.structuredClone],
-  ['AbortSignal.prototype.throwIfAborted', globalThis.AbortSignal?.prototype.throwIfAborted],
+  ['AbortController', globalThis.AbortController],
   ['DOMMatrix', globalThis.DOMMatrix],
   ['Worker', globalThis.Worker],
   ['WebAssembly.instantiate', globalThis.WebAssembly?.instantiate],

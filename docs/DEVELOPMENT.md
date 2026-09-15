@@ -1,5 +1,13 @@
 # ByteDesk 设计与开发记录
 
+## PDF 缺失 API 的实际兼容处理（2026-09-15）
+
+线上预检进一步明确缺失 `Promise.withResolvers`、`structuredClone`、`AbortSignal.prototype.throwIfAborted`。上一轮只检测这些能力并提示升级，这一轮补齐前两项及 PDF 使用的数组访问、缓冲区传输能力；扫描、批处理与 ZIP 打包的取消检查统一改为读取 `signal.aborted`，保留取消原因，旧环境没有 `reason` 时使用 `AbortError`。
+
+主程序在导入 PDF.js 前按需加载 core-js；Worker 运行在独立上下文，也将同一兼容入口打包进去，并通过 esbuild 转换为 ES2020。新 Worker 文件名及路径集中在 `pdfAssetPaths.ts`，防止复用上一版没有兼容层的 Worker；准备脚本继续保持未变化资源的修改时间，分发目录附带 core-js 许可证。原生数据复制不可用时关闭 PDF.js 的离屏图像/图像解码加速路径，继续以画布和字节数组处理，避免兼容库无法完整模拟的原生图像对象传输。
+
+验证在主程序和独立 Worker 环境分别移除相关 API，检查 PDF 读取、循环引用、类型化数组、Map、缓冲区转移与取消语义；所有客户端模块及新 Worker 均通过 ES2020 语法解析。生产预览模拟缺失三个已报告 API，额外移除取消原因，并在真正创建的 PDF Worker 中移除 API：12 页合成扫描件成功识别编号、生成 ZIP，停止操作正常且无异常日志；现代浏览器的单页扫描件也识别成功。完整检查、40 页构建及 51 项测试通过。尚未在朋友的原设备上复测，因此仍不承诺所有旧内核或所有 PDF 编码组合均可使用。
+
 ## 浏览器脚本语法与导航兼容性（2026-09-15）
 
 后续日志显示 `crypto.randomUUID is not a function`，壁纸和 PDF 识别同时报 `Unexpected token '{'`。导航初始化原来直接调用 `randomUUID`，在旧浏览器或非安全上下文中可能中断；现在用文档前缀加递增序号标记历史记录，保留已有历史键和路由状态，不依赖 Web Crypto。这些键仅用于正文滚动位置，不是安全凭据。

@@ -12,17 +12,17 @@ test('initialization errors retain their original message, including worker stri
  assert.equal(describePdfError(undefined), 'Unknown error');
 });
 
-test('PDF preflight reports missing native APIs before loading the scanner', () => {
- const context = createContext({ exports: {}, DOMMatrix: function () {}, Worker: function () {}, structuredClone() {}, AbortSignal: { prototype: { throwIfAborted() {} } } });
+test('PDF preflight still reports platform features that cannot be polyfilled', () => {
+ const context = createContext({ exports: {}, DOMMatrix: function () {}, Worker: function () {}, structuredClone() {}, AbortController: function () {} });
  const script = ts.transpileModule(readFileSync('src/lib/pdfToolErrors.ts', 'utf8'), {
   compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 },
  }).outputText;
  runInContext(script, context);
  assert.doesNotThrow(() => context.exports.assertPdfBrowserSupport());
- runInContext('delete Promise.withResolvers; delete Array.prototype.at; delete globalThis.structuredClone;', context);
+ runInContext('delete globalThis.Worker; delete globalThis.WebAssembly;', context);
  assert.throws(() => context.exports.assertPdfBrowserSupport(), error => {
   assert.equal(error.name, 'PdfBrowserCompatibilityError');
-  for (const feature of ['Promise.withResolvers', 'Array.prototype.at', 'structuredClone']) assert.ok(error.message.includes(feature));
+  for (const feature of ['Worker', 'WebAssembly.instantiate']) assert.ok(error.message.includes(feature));
   assert.equal(pdfToolFailureKind(error), 'compatibility');
   return true;
  });

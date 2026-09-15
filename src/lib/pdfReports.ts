@@ -1,3 +1,5 @@
+import { throwIfAborted } from './abort.ts';
+
 /** Fixed mode groups by position, independent of report numbers. */
 export function pageGroups(pageCount: number, pagesPerReport = 2): number[][] {
   if (!Number.isSafeInteger(pageCount) || pageCount < 1) throw new Error('Invalid page count');
@@ -192,12 +194,12 @@ export async function packReports(
   const files: Record<string, Uint8Array> = Object.create(null);
   let completed = 0;
   for (const [sourceIndex, source] of sources.entries()) {
-    signal?.throwIfAborted();
+    throwIfAborted(signal);
     const selected = parts.map((part, index) => ({ part, index })).filter(({ part }) => part.sourceIndex === sourceIndex);
     if (!selected.length) continue;
     const original = await PDFDocument.load(await source.bytes());
     for (const { part, index } of selected) {
-      signal?.throwIfAborted();
+      throwIfAborted(signal);
       if (!part.pages.length || part.pages.some(page => !Number.isInteger(page) || page < 0 || page >= original.getPageCount())) throw new Error('Invalid page range');
       const output = await PDFDocument.create();
       const pages = await output.copyPages(original, part.pages);
@@ -210,7 +212,7 @@ export async function packReports(
     }
   }
   if (completed !== parts.length || !completed) throw new Error('Missing source PDF');
-  signal?.throwIfAborted();
+  throwIfAborted(signal);
   // Scans are already compressed; storing them avoids a second expensive compression.
   return zipSync(files, { level: 0 });
 }

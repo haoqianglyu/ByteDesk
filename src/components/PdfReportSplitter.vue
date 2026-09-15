@@ -2,7 +2,8 @@
 import { computed, markRaw, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 import type { Locale } from '../lib/i18n';
 import { groupReportRanges, groupScannedReports, packReports, parseReportRanges, reportFileNames, validReportName, type ScannedFile, type ScannedReport } from '../lib/pdfReports';
-import { assertPdfBrowserSupport, describePdfError, pdfToolFailureKind } from '../lib/pdfToolErrors';
+import { describePdfError, pdfToolFailureKind } from '../lib/pdfToolErrors';
+import { throwIfAborted } from '../lib/abort';
 
 const props = defineProps<{ locale: Locale }>();
 const zh = computed(() => props.locale === 'zh');
@@ -181,11 +182,10 @@ async function scan() {
   progressText.value = t('正在准备本地识别工具，首次使用需要加载资源…', 'Preparing local recognition tools. Assets load on first use…');
   let scanner: Awaited<ReturnType<typeof import('../lib/pdfReportScanner')['createReportScanner']>> | undefined;
   try {
-    assertPdfBrowserSupport();
     const { createReportScanner } = await import('../lib/pdfReportScanner');
     scanner = await createReportScanner(signal);
     for (const [index, file] of files.value.entries()) {
-      signal.throwIfAborted();
+      throwIfAborted(signal);
       scanningIndex.value = index;
       try {
         const result = await scanner.scan(file, (page, total) => {

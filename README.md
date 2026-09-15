@@ -49,11 +49,11 @@ npm run preview  # 预览 dist，先运行 build
 
 当前 OCR 针对此类检测报告的右上角字段及 `E030E10212600001` 这样的编号格式（此处为示例），支持旋转扫描；其他版式可手动填写编号。每批最多 100 个文件、200 MB，单文件最多 100 MB、1,000 页。加密或损坏文件会单独报错，下载部分结果前需要明确选择。
 
-PDF.js、Tesseract.js、英文编号与中文页码识别模型均由本站提供，不向第三方上传 PDF。PDF.js 主程序及 Worker 使用同版本的官方 `legacy` 兼容构建；Worker 使用独立文件名 `pdf.worker.legacy.min.mjs`，避免命中原先现代构建的缓存。`predev` / `prebuild` 自动从 npm 依赖准备 `public/vendor/pdf-tools-v1/`，该生成目录不提交；升级依赖时需要同步递增资源路径版本。用户文件、试拆结果和临时识别图片放在已忽略的 `output/`、`tmp/`，不进入网站构建。
+PDF.js、Tesseract.js、英文编号与中文页码识别模型均由本站提供，不向第三方上传 PDF。PDF.js 主程序及 Worker 基于同版本的官方 `legacy` 构建；主程序按需加载选定的 core-js 兼容模块，Worker 将相同模块一起打包并转换为 ES2020。Worker 使用新文件名 `pdf.worker.compat-v2.min.mjs`，避免复用此前没有 API 补齐的缓存。`predev` / `prebuild` 自动从 npm 依赖准备 `public/vendor/pdf-tools-v1/` 及许可证，该生成目录不提交；升级依赖时需要同步递增对应资源路径版本。用户文件、试拆结果和临时识别图片放在已忽略的 `output/`、`tmp/`，不进入网站构建。
 
 如果点击“开始识别”后工具未能启动，可展开“查看错误详情”，获取原始错误及浏览器版本；同一异常也会记录到 Console。资源加载失败可能来自网络或过期页面，刷新会清空当前已选文件；兼容性或未知初始化错误不会再统一提示“检查网络”。排查时先保留错误详情，勿仅凭提示认定 PDF 损坏或浏览器不兼容。
 
-PDF 识别在加载前检查 `Promise.withResolvers`、`structuredClone` 等必要能力。缺失时提示升级浏览器，并在错误详情列出缺项、安全上下文和协议。PDF.js 官方当前 `legacy` 支持范围包括 Chrome 125+、Safari 18+（部分功能有限）和 Firefox ESR+，详见 [PDF.js 浏览器支持说明](https://github.com/mozilla/pdf.js/wiki/Frequently-Asked-Questions#which-browsersenvironments-are-supported)。ES2020 语法转换不会把识别引擎的 API 要求降到所有 ES2020 浏览器；独立 Worker 保持官方兼容构建。
+PDF 识别先补齐 `Promise.withResolvers`、`structuredClone`、数组访问和缓冲区传输等能力，再检查仍然必需的浏览器功能。取消扫描和打包直接检查 `signal.aborted`，不依赖较新的 `throwIfAborted()`；缺少原生 `structuredClone` 时使用画布/字节数组图像路径，避开无法完整补齐的图像对象传输。Worker、WebAssembly 等基础能力缺失时仍会提示升级，并在详情列出缺项、安全上下文和协议。这是针对已报告缺失 API 的兼容处理，不代表覆盖所有旧内核；PDF.js 上游支持范围见 [浏览器支持说明](https://github.com/mozilla/pdf.js/wiki/Frequently-Asked-Questions#which-browsersenvironments-are-supported)。
 
 开发预览会在启动时预构建 PDF、OCR 和 ZIP 依赖，避免首次点击拆分才发现依赖并触发整页刷新。准备识别资源时只写入有变化的文件，重复构建不会因重写相同资源而清空当前选择。
 

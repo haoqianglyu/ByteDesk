@@ -1,7 +1,12 @@
 import { detectNumberGroups, detectReportGroups, readPrintedPagination, readReportNumber, type PageReading, type ScannedFile } from './pdfReports';
 import type { Worker } from 'tesseract.js';
+import { throwIfAborted } from './abort';
+import { assertPdfBrowserSupport } from './pdfToolErrors';
+import { PDF_ASSETS as ASSETS, PDF_WORKER_FILE } from './pdfAssetPaths';
 
-const ASSETS = '/vendor/pdf-tools-v1';
+// Capture this before installing compatibility modules. Polyfills cannot transfer
+// every native image type; keep the canvas/typed-array rendering path when needed.
+const nativeStructuredClone = typeof globalThis.structuredClone === 'function';
 export type { ScannedReport, ScannedFile } from './pdfReports';
 
 function canvas(width: number, height: number) {
@@ -89,29 +94,33 @@ function paginationCrop(source: HTMLCanvasElement) {
 }
 
 export async function createReportScanner(signal: AbortSignal) {
+  await import('./pdfRuntimeCompat');
+  throwIfAborted(signal);
+  assertPdfBrowserSupport();
   // Use PDF.js's official compatibility build on both sides of the worker boundary.
   const [pdfjs, { createWorker, PSM }] = await Promise.all([import('pdfjs-dist/legacy/build/pdf.mjs'), import('tesseract.js')]);
-  pdfjs.GlobalWorkerOptions.workerSrc = `${ASSETS}/pdf.worker.legacy.min.mjs`;
+  throwIfAborted(signal);
+  pdfjs.GlobalWorkerOptions.workerSrc = `${ASSETS}/${PDF_WORKER_FILE}`;
   let worker: Worker | undefined;
   let paginationWorker: Worker | undefined;
   async function ocr() {
-    signal.throwIfAborted();
+    throwIfAborted(signal);
     if (!worker) {
       worker = await createWorker('eng', 1, {
         workerPath: `${ASSETS}/worker.min.js`, corePath: `${ASSETS}/core`, langPath: `${ASSETS}/lang`,
       });
-      signal.throwIfAborted();
+      throwIfAborted(signal);
       await worker.setParameters({ tessedit_pageseg_mode: PSM.SINGLE_LINE, tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789' });
     }
     return worker;
   }
   async function paginationOcr() {
-    signal.throwIfAborted();
+    throwIfAborted(signal);
     if (!paginationWorker) {
       paginationWorker = await createWorker('chi_sim', 1, {
         workerPath: `${ASSETS}/worker.min.js`, corePath: `${ASSETS}/core`, langPath: `${ASSETS}/lang`,
       });
-      signal.throwIfAborted();
+      throwIfAborted(signal);
       await paginationWorker.setParameters({ tessedit_pageseg_mode: PSM.SINGLE_LINE, tessedit_char_whitelist: '共页第0123456789' });
     }
     return paginationWorker;
@@ -125,7 +134,7 @@ export async function createReportScanner(signal: AbortSignal) {
     // Slight rasterization differences can turn a zero into O or add a glyph.
     // Retry unclear crops at two contrasts instead of guessing from nearby IDs.
     for (const threshold of [200, 220]) {
-      signal.throwIfAborted();
+      throwIfAborted(signal);
       const cleaned = thresholdCrop(crop, threshold);
       try {
         const data = (await worker.recognize(cleaned)).data;
@@ -140,9 +149,11 @@ export async function createReportScanner(signal: AbortSignal) {
   }
   return {
     async scan(file: File, progress: (page: number, total: number) => void, rotation: number | 'auto', detectPageCount = false): Promise<ScannedFile> {
-      signal.throwIfAborted();
+      throwIfAborted(signal);
       const task = pdfjs.getDocument({
         data: new Uint8Array(await file.arrayBuffer()),
+        isOffscreenCanvasSupported: nativeStructuredClone && typeof globalThis.OffscreenCanvas === 'function',
+        isImageDecoderSupported: nativeStructuredClone,
         cMapUrl: `${ASSETS}/cmaps/`, cMapPacked: true,
         standardFontDataUrl: `${ASSETS}/standard_fonts/`, wasmUrl: `${ASSETS}/wasm/`,
       });
@@ -156,7 +167,7 @@ export async function createReportScanner(signal: AbortSignal) {
         if (pdf.numPages > 1000) throw new Error('PAGE_LIMIT');
         const readings: PageReading[] = [];
         for (let index = 0; index < pdf.numPages; index++) {
-          signal.throwIfAborted(); progress(index, pdf.numPages);
+          throwIfAborted(signal); progress(index, pdf.numPages);
           const page = await pdf.getPage(index + 1);
           const viewport = page.getViewport({ scale: 1 });
           const scaled = page.getViewport({ scale: 2200 / Math.max(viewport.width, viewport.height) });
@@ -169,7 +180,7 @@ export async function createReportScanner(signal: AbortSignal) {
           let best: PageReading | undefined;
           const angles = embedded || embeddedPagination ? [rotation === 'auto' ? 0 : rotation] : rotation === 'auto' ? [...new Set([preferred, 0, 90, 180, 270])] : [rotation];
           for (const angle of angles) {
-            signal.throwIfAborted();
+            throwIfAborted(signal);
             const upright = rotate(rendered.element, angle);
             const crop = embedded ? undefined : numberCrop(upright);
             const data = crop ? await recognizeNumber(crop) : { reading: embedded, confidence: 100 };

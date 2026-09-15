@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { parse } from 'acorn';
+import { PDF_ASSETS, PDF_WORKER_FILE } from '../src/lib/pdfAssetPaths.ts';
 
 function walk(dir) {
  return readdirSync(dir, { withFileTypes: true }).flatMap(entry => entry.isDirectory() ? walk(join(dir, entry.name)) : [join(dir, entry.name)]);
@@ -12,6 +13,7 @@ test('all bundled and inline browser scripts parse as ES2020, including lazy wal
  const assets = walk('dist/_astro').filter(file => file.endsWith('.js'));
  assert.ok(assets.some(file => /three\.module\./.test(file)), 'Three.js must be checked');
  assert.ok(assets.some(file => /\/pdf\./.test(file)), 'PDF.js must be checked');
+ assets.push(`dist${PDF_ASSETS}/${PDF_WORKER_FILE}`);
  for (const file of assets) {
   assert.doesNotThrow(() => parse(readFileSync(file, 'utf8'), { ecmaVersion: 2020, sourceType: 'module' }), file);
  }
