@@ -89,8 +89,9 @@ function paginationCrop(source: HTMLCanvasElement) {
 }
 
 export async function createReportScanner(signal: AbortSignal) {
-  const [pdfjs, { createWorker, PSM }] = await Promise.all([import('pdfjs-dist'), import('tesseract.js')]);
-  pdfjs.GlobalWorkerOptions.workerSrc = `${ASSETS}/pdf.worker.min.mjs`;
+  // Use PDF.js's official compatibility build on both sides of the worker boundary.
+  const [pdfjs, { createWorker, PSM }] = await Promise.all([import('pdfjs-dist/legacy/build/pdf.mjs'), import('tesseract.js')]);
+  pdfjs.GlobalWorkerOptions.workerSrc = `${ASSETS}/pdf.worker.legacy.min.mjs`;
   let worker: Worker | undefined;
   let paginationWorker: Worker | undefined;
   async function ocr() {

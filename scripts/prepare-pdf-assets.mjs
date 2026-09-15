@@ -37,7 +37,8 @@ export async function preparePdfAssets(modules = resolve('node_modules'), dest =
   for (const language of ['eng', 'chi_sim']) {
     await copyChanged(`${modules}/@tesseract.js-data/${language}/4.0.0_best_int/${language}.traineddata.gz`, `${dest}/lang/${language}.traineddata.gz`);
   }
-  await copyChanged(`${modules}/pdfjs-dist/build/pdf.worker.min.mjs`, `${dest}/pdf.worker.min.mjs`);
+  // A distinct URL avoids reusing a cached worker from the modern build.
+  await copyChanged(`${modules}/pdfjs-dist/legacy/build/pdf.worker.min.mjs`, `${dest}/pdf.worker.legacy.min.mjs`);
   for (const folder of ['cmaps', 'standard_fonts', 'wasm']) await copyTree(`${modules}/pdfjs-dist/${folder}`, `${dest}/${folder}`);
 }
 

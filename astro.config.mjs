@@ -12,7 +12,7 @@ export default defineConfig({
   vite: {
     // The scanner loads only after a user selects files. Discovering these
     // dependencies then triggers a Vite full reload and loses the selection.
-    optimizeDeps: { include: ['pdfjs-dist', 'tesseract.js', 'pdf-lib', 'fflate'] },
+    optimizeDeps: { include: ['pdfjs-dist/legacy/build/pdf.mjs', 'tesseract.js', 'pdf-lib', 'fflate'] },
   },
   integrations: [vue(), {
     name: 'bytedesk-vite-cache',

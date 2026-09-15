@@ -14,7 +14,7 @@ test('repeated PDF asset preparation leaves unchanged files untouched and repair
     'tesseract.js/dist/worker.min.js', 'tesseract.js-core/core.wasm.js',
     '@tesseract.js-data/eng/4.0.0_best_int/eng.traineddata.gz',
     '@tesseract.js-data/chi_sim/4.0.0_best_int/chi_sim.traineddata.gz',
-    'pdfjs-dist/build/pdf.worker.min.mjs', 'pdfjs-dist/cmaps/map.bcmap',
+    'pdfjs-dist/legacy/build/pdf.worker.min.mjs', 'pdfjs-dist/cmaps/map.bcmap',
     'pdfjs-dist/standard_fonts/font.pfb', 'pdfjs-dist/wasm/nested/decoder.wasm',
   ];
   for (const source of sources) {
@@ -22,6 +22,7 @@ test('repeated PDF asset preparation leaves unchanged files untouched and repair
     await writeFile(join(modules, source), source);
   }
   await preparePdfAssets(modules, output);
+  assert.equal(await readFile(join(output, 'pdf.worker.legacy.min.mjs'), 'utf8'), 'pdfjs-dist/legacy/build/pdf.worker.min.mjs');
   const paths = await readdir(output, { recursive: true });
   const files = [];
   for (const path of paths) if ((await stat(join(output, path))).isFile()) files.push(path);

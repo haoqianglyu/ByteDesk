@@ -2,6 +2,7 @@
 import { computed, markRaw, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 import type { Locale } from '../lib/i18n';
 import { groupReportRanges, groupScannedReports, packReports, parseReportRanges, reportFileNames, validReportName, type ScannedFile, type ScannedReport } from '../lib/pdfReports';
+import { describePdfError, pdfToolFailureKind } from '../lib/pdfToolErrors';
 
 const props = defineProps<{ locale: Locale }>();
 const zh = computed(() => props.locale === 'zh');
@@ -36,6 +37,7 @@ const groupHint = computed(() => {
 });
 const folderSupported = ref(true), dragging = ref(false), onlyReview = ref(false);
 const note = ref(''), progressText = ref(''), percent = ref(0), stopping = ref(false);
+const failureDetails = ref('');
 const incomplete = ref(false), allowPartial = ref(false), downloaded = ref(false);
 let controller: AbortController | undefined;
 const busy = computed(() => stage.value === 'scanning' || stage.value === 'packing');
@@ -55,6 +57,7 @@ const sourceName = (file: File) => file.webkitRelativePath || file.name;
 const range = (report: ScannedReport) => report.pages.length === 1 ? `${report.pages[0]! + 1}` : `${report.pages[0]! + 1}–${report.pages.at(-1)! + 1}`;
 
 function invalidate() {
+  failureDetails.value = '';
   fileStates.value.forEach(state => { state.scanned = undefined; });
   reports.value = []; errors.value = []; stage.value = 'idle'; downloaded.value = false;
   incomplete.value = false; allowPartial.value = false; onlyReview.value = false; percent.value = 0;
@@ -164,6 +167,12 @@ function errorMessage(error: unknown) {
   if (message === 'PAGE_LIMIT') return t('单个 PDF 最多处理 1,000 页，请先分批。', 'The limit is 1,000 pages per PDF. Split this file into batches.');
   return t('无法读取或识别此 PDF。请检查文件是否损坏，并重试。', 'Could not read or recognize this PDF. Check the file and try again.');
 }
+function toolFailureMessage(error: unknown) {
+  const kind = pdfToolFailureKind(error);
+  if (kind === 'resource') return t('识别程序资源未能加载，可能是网络问题或页面版本已更新。请刷新页面后重新选择文件；原文件不受影响。', 'Recognition resources could not load. The connection may have failed or this page may be out of date. Refresh and select your files again; originals are unchanged.');
+  if (kind === 'compatibility') return t('识别程序遇到浏览器兼容性或脚本错误。请使用最新版 Chrome / Edge 重试，并查看下方错误详情。文件仍保留在本地。', 'Recognition encountered a browser compatibility or script error. Try the latest Chrome / Edge and check the error details below. Files remain local.');
+  return t('识别工具未能启动，请查看下方错误详情后重试。文件仍保留在本地。', 'Recognition tools could not start. Check the error details below and retry. Files remain local.');
+}
 async function scan() {
   if (!files.value.length || busy.value || !validSettings.value) return;
   invalidate(); stage.value = 'scanning'; note.value = ''; stopping.value = false;
@@ -185,6 +194,7 @@ async function scan() {
         regroupFile(index);
       } catch (error) {
         if (signal.aborted) throw error;
+        console.error('[ByteDesk PDF] File recognition failed', error);
         errors.value.push({ source: sourceName(file), message: errorMessage(error) });
       }
     }
@@ -192,10 +202,17 @@ async function scan() {
     incomplete.value = errors.value.length > 0;
   } catch (error) {
     incomplete.value = true;
-    note.value = signal.aborted ? t('已停止。已完成文件的结果保留在下方。', 'Stopped. Results from completed files are kept below.') : t('识别工具加载失败，请检查网络后重试。文件仍保留在本地。', 'Recognition tools could not load. Check your connection and retry. Files remain local.');
+    if (signal.aborted) note.value = t('已停止。已完成文件的结果保留在下方。', 'Stopped. Results from completed files are kept below.');
+    else {
+      console.error('[ByteDesk PDF] Recognition tools could not start', error);
+      note.value = toolFailureMessage(error);
+      failureDetails.value = `${describePdfError(error)}\n\n${navigator.userAgent}`;
+    }
   } finally {
     scanningIndex.value = -1;
-    await scanner?.dispose(); stage.value = 'ready'; stopping.value = false;
+    try { await scanner?.dispose(); }
+    catch (error) { console.warn('[ByteDesk PDF] Recognition cleanup failed', error); }
+    finally { stage.value = 'ready'; stopping.value = false; }
   }
 }
 async function download() {
@@ -236,6 +253,11 @@ onBeforeUnmount(() => controller?.abort());
     </div>
     <div class="pdf-local-note"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>{{ t('文件在你的浏览器中处理，不上传。原始页面内容与方向保持不变。', 'Files stay in your browser. Original page content and orientation are preserved.') }}</div>
     <p v-if="note" class="pdf-alert" role="status">{{ note }}</p>
+    <details v-if="failureDetails" class="pdf-error-details">
+      <summary>{{ t('查看错误详情', 'View error details') }}</summary>
+      <pre>{{ failureDetails }}</pre>
+      <p>{{ t('排查问题时，可将以上错误和浏览器版本提供给网站维护者。', 'Share this error and browser version with the site maintainer for troubleshooting.') }}</p>
+    </details>
     <section v-if="files.length" class="pdf-queue" :aria-label="t('已选文件', 'Selected files')">
       <div class="pdf-section-head"><h2>{{ t('已选文件', 'Selected files') }} <span>{{ files.length }}</span></h2><span>{{ size(totalSize) }} <button :disabled="busy" @click="clear">{{ t('清空', 'Clear') }}</button></span></div>
       <fieldset class="pdf-split-mode" :disabled="busy">
@@ -291,4 +313,8 @@ onBeforeUnmount(() => controller?.abort());
 .pdf-group-size{display:flex;align-items:center;gap:10px}.pdf-group-size input{width:76px;min-height:36px;padding:6px 8px;border:1px solid var(--line);border-radius:5px;background:var(--surface);color:var(--text);font-size:14px;font-variant-numeric:tabular-nums}.pdf-group-size>span{color:var(--secondary);font-size:12px}.pdf-run p.pdf-validation{color:var(--tool-warn)}
 .pdf-tool{--tool-warn:#94611b;font-size:13px}.pdf-steps{display:flex;list-style:none;padding:0;margin:0 0 24px;gap:28px;color:var(--secondary);font-size:12px}.pdf-steps li{display:flex;align-items:center;gap:8px}.pdf-steps li>span{display:grid;place-items:center;width:23px;height:23px;border:1px solid var(--line);border-radius:50%;font-variant-numeric:tabular-nums}.pdf-steps .current{color:var(--accent);font-weight:600}.pdf-steps .current>span{background:var(--selection);border-color:var(--selection)}.pdf-drop{border:1px dashed var(--accent);border-radius:12px;padding:32px 24px;background:var(--surface);display:flex;align-items:center;text-align:center;flex-direction:column;gap:16px}.pdf-drop.dragging{background:var(--selection);outline:3px solid var(--accent);outline-offset:3px}.pdf-paper-icon{width:58px;height:62px}.pdf-drop h2{font-size:20px;font-weight:600;letter-spacing:-.4px}.pdf-drop p{max-width:440px;margin:8px auto 0;color:var(--secondary);font-size:12px;line-height:1.8}.pdf-pick-actions{display:flex;gap:10px;margin-top:2px}.pdf-button{border:1px solid var(--line);border-radius:7px;background:var(--surface);padding:10px 17px;font-weight:550;font-size:13px;white-space:nowrap;min-height:40px}.pdf-button:hover:not(:disabled){background:var(--hover)}.pdf-button.primary{background:var(--accent);color:var(--surface);border-color:var(--accent)}.pdf-button.primary:hover:not(:disabled){filter:brightness(.93)}.pdf-button:disabled{opacity:.45}.pdf-button.small{padding:5px 11px;min-height:34px;font-size:12px}.pdf-hidden{display:none}.pdf-sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.pdf-local-note{display:flex;align-items:flex-start;gap:7px;color:var(--secondary);font-size:11px;line-height:1.8;margin:12px 0 26px}.pdf-local-note svg{margin-top:3px}.pdf-drop.compact{flex-direction:row;flex-wrap:wrap;padding:18px;text-align:left;gap:14px}.compact .pdf-paper-icon{width:38px;height:41px}.compact h2{font-size:15px}.compact>div:nth-child(2){flex:1;min-width:170px}.compact p{margin:4px 0 0;font-size:11px}.compact .pdf-pick-actions{margin-left:auto}.pdf-section-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:13px}.pdf-section-head h2{font-size:16px;font-weight:600}.pdf-section-head h2 span{font-size:12px;color:var(--secondary);font-weight:400;margin-left:6px}.pdf-section-head>span{font-size:11px;color:var(--secondary)}.pdf-section-head>span>button{color:var(--accent);margin-left:15px;padding:5px}.pdf-queue ul{list-style:none;padding:0;margin:0;max-height:440px;overflow-y:auto}.pdf-queue li{padding:12px 0;border-top:1px solid var(--line);font-size:12px}.pdf-file-line{display:flex;align-items:center;gap:12px}.pdf-file-type{color:var(--accent);font-size:9px;font-weight:650;border:1px solid var(--line);padding:4px;border-radius:3px}.pdf-source-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}.pdf-file-size{font-size:11px;color:var(--secondary);white-space:nowrap}.pdf-file-line>button{font-size:20px;color:var(--secondary);padding:2px 7px}.pdf-run{border-top:1px solid var(--line);padding:18px 0 10px;display:flex;align-items:center;justify-content:space-between;gap:15px}.pdf-run strong,.pdf-download strong{font-size:14px;font-weight:550}.pdf-run p,.pdf-download p{font-size:11px;color:var(--secondary);margin-top:5px}.pdf-settings{color:var(--secondary);font-size:11px;padding:8px 0 22px}.pdf-settings summary,.pdf-proof summary{cursor:pointer;width:fit-content;padding:5px 0;color:var(--accent)}.pdf-settings label{display:flex;align-items:center;gap:15px;margin:12px 0}.pdf-settings select{background:var(--surface);border:1px solid var(--line);border-radius:5px;color:var(--text);padding:6px;font-size:12px}.pdf-settings p{line-height:1.9;max-width:650px}.pdf-progress{border:1px solid var(--line);padding:17px;border-radius:8px;margin:16px 0 24px;background:var(--surface)}.pdf-progress>div{display:flex;justify-content:space-between;gap:12px;font-size:12px}.pdf-progress>div>span{overflow-wrap:anywhere}.pdf-progress button{color:var(--accent);flex-shrink:0}.pdf-progress progress{width:100%;height:6px;border:0;display:block;margin-top:13px;accent-color:var(--accent)}.pdf-alert{background:var(--hover);border-left:3px solid var(--accent);padding:12px 15px;margin:15px 0;color:var(--secondary);font-size:12px;line-height:1.8;overflow-wrap:anywhere}.pdf-alert p+p{margin-top:8px}.pdf-results{margin-top:22px}.pdf-filter{display:flex;align-items:center;gap:5px;color:var(--secondary);font-size:11px}.pdf-filter input,.pdf-partial input{accent-color:var(--accent)}.pdf-result-note{font-size:12px;color:var(--secondary);line-height:1.8;margin-bottom:18px}.pdf-report-list{border-top:1px solid var(--line)}.pdf-report{padding:17px 0;border-bottom:1px solid var(--line)}.pdf-report-top{display:flex;gap:12px;font-size:11px;color:var(--secondary);margin-bottom:10px;align-items:center}.pdf-report-top>span:first-child{flex-shrink:0;min-width:64px}.pdf-status{color:var(--accent);font-size:10px;white-space:nowrap}.attention .pdf-status{color:var(--tool-warn)}.pdf-name-line{display:flex;align-items:center;gap:10px}.pdf-name-line>input{width:min(100%,300px);min-width:0;border:1px solid var(--line);background:var(--surface);border-radius:5px;padding:8px 10px;font-size:14px;font-variant-numeric:tabular-nums;color:var(--text);letter-spacing:.3px}.pdf-name-line>span{color:var(--secondary);font-size:12px}.pdf-name-line>button{margin-left:auto}.pdf-validation,.pdf-duplicate{margin-top:8px;font-size:11px;overflow-wrap:anywhere}.pdf-validation{color:var(--tool-warn)}.pdf-duplicate{color:var(--secondary)}.pdf-proof{margin-top:6px;font-size:11px}.pdf-proof-grid{display:grid;gap:12px;margin-top:8px}.pdf-proof figure{margin:0;min-width:0}.pdf-proof figcaption{color:var(--secondary);margin-bottom:6px;overflow-wrap:anywhere}.pdf-proof img{width:100%;max-width:660px;height:auto;object-fit:contain;background:white;border:1px solid var(--line);border-radius:4px}.pdf-proof p{color:var(--tool-warn);margin-top:8px}.pdf-partial{display:flex;align-items:flex-start;gap:7px;font-size:12px;color:var(--secondary);padding-top:20px}.pdf-download{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:22px 0;margin-top:6px}.pdf-empty-review{padding:25px 0;text-align:center;color:var(--secondary)}:global([data-theme=dark]) .pdf-tool{--tool-warn:#e6b668}
 @container content (max-width:620px){.pdf-steps{gap:15px;justify-content:space-between;font-size:11px}.pdf-steps li{gap:5px}.pdf-steps li>span{width:20px;height:20px}.pdf-drop{padding:24px 17px}.pdf-drop h2{font-size:18px}.compact .pdf-pick-actions{margin-left:0;width:100%;padding-left:52px}.pdf-run,.pdf-download{align-items:flex-start;flex-direction:column}.pdf-run>.pdf-button,.pdf-download>.pdf-button{width:100%}.pdf-report-top{gap:8px}.pdf-name-line{flex-wrap:wrap}.pdf-name-line>input{flex:1;max-width:300px}.pdf-name-line>button{margin-left:0}.pdf-section-head{gap:10px}.pdf-filter{font-size:10px}.pdf-proof-grid{grid-template-columns:1fr}.pdf-source-name{font-size:11px}.pdf-section-head h2{font-size:15px}}
+.pdf-error-details{margin:-5px 0 20px;font-size:12px;color:var(--secondary)}
+.pdf-error-details summary{cursor:pointer;color:var(--accent);padding:5px 0;width:fit-content}
+.pdf-error-details pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px;line-height:1.7;background:var(--hover);padding:12px;border-radius:5px;margin:8px 0}
+.pdf-error-details p{font-size:11px;line-height:1.8}
 </style>
