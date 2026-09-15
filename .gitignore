@@ -12,3 +12,6 @@ dist/
 !.dev.vars.example
 .codex/
 .vscode/
+tmp/
+output/
+public/vendor/pdf-tools-v1/

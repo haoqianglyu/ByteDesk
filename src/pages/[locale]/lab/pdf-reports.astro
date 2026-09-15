@@ -1,0 +1,16 @@
+---
+import Base from '../../../layouts/Base.astro';
+import PdfReportSplitter from '../../../components/PdfReportSplitter.vue';
+import { locales, type Locale } from '../../../lib/i18n';
+export function getStaticPaths() { return locales.map(locale => ({ params: { locale } })); }
+const locale = Astro.params.locale as Locale;
+const zh = locale === 'zh';
+---
+<Base locale={locale} active="lab" title={`${zh ? '报告拆分台' : 'Report splitter'} · ByteDesk`} description={zh ? '默认按连续报告编号智能拆分，支持同一 PDF 混合不同页数，也可统一设置每份页数，按报告编号命名并打包下载。文件在浏览器本地处理。' : 'Split by consecutive report IDs by default, including mixed page counts, or choose a fixed page count. Name reports by their numbers and download a ZIP. Files stay in your browser.'} alternateHref={`/${zh ? 'en' : 'zh'}/lab/pdf-reports/`}>
+  <div class="showcase-page work-detail pdf-report-page">
+    <a class="work-back" href={`/${locale}/lab/`}>← {zh ? '所有实验' : 'All experiments'}</a>
+    <header class="showcase-heading"><h1>{zh ? '报告拆分台' : 'Report splitter'}</h1><p>{zh ? '整本扫描件进来，每份报告各归其位。支持同一 PDF 混合不同页数的报告，按报告编号命名，一次打包下载。' : 'Turn a scanned bundle into individual reports, even with mixed page counts in one PDF. Name by report number and download one ZIP.'}</p></header>
+    <PdfReportSplitter locale={locale} client:load/>
+  </div>
+</Base>
+<style>.pdf-report-page{max-width:1000px}.pdf-report-page .showcase-heading{margin-bottom:26px}.pdf-report-page .showcase-heading h1{font-size:32px;margin-top:0}.pdf-report-page .work-back{margin-bottom:16px}</style>

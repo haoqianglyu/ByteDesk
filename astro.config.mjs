@@ -9,6 +9,11 @@ if (existsSync('.env')) process.loadEnvFile('.env');
 export default defineConfig({
   site: process.env.SITE_URL || 'http://localhost:4321',
   output: 'static',
+  vite: {
+    // The scanner loads only after a user selects files. Discovering these
+    // dependencies then triggers a Vite full reload and loses the selection.
+    optimizeDeps: { include: ['pdfjs-dist', 'tesseract.js', 'pdf-lib', 'fflate'] },
+  },
   integrations: [vue(), {
     name: 'bytedesk-vite-cache',
     hooks: {

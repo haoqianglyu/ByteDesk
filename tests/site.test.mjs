@@ -106,7 +106,7 @@ test('preview and production builds agree on robots, canonical URLs and sample i
 test('creative spaces have bilingual routes, working detail pages and matching language switches', () => {
  for (const locale of ['zh', 'en']) {
   const other = locale === 'zh' ? 'en' : 'zh';
-  for (const route of ['lab', 'lab/glass-playground', 'lab/logo-study', 'projects', 'projects/bytedesk']) {
+  for (const route of ['lab', 'lab/glass-playground', 'lab/logo-study', 'lab/pdf-reports', 'projects', 'projects/bytedesk']) {
    const html = read(`${locale}/${route}/index.html`);
    assert.ok(html.includes(`/${other}/${route}/`), `Language switch must preserve ${route}`);
    assert.ok(read('sitemap.xml').includes(`/${locale}/${route}/`));
