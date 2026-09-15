@@ -14,6 +14,16 @@ function walk(dir) { return readdirSync(dir, { withFileTypes: true }).flatMap(e 
 const pages = walk(root).filter(p => p.endsWith('.html'));
 const decode = s => s.replaceAll('&amp;', '&').replaceAll('&#39;', "'").replaceAll('&quot;', '"');
 
+test('every desktop route supports client navigation and keeps its page content server rendered', () => {
+ for (const file of pages.filter(file => file !== join(root, 'index.html'))) {
+  const html = readFileSync(file, 'utf8');
+  assert.match(html, /name="astro-view-transitions-enabled"/, file);
+  assert.match(html, /data-astro-transition-persist="desktop-shell"/, file);
+  assert.match(html, /<main\b[^>]*id="main-content"[^>]*>[\s\S]*?<astro-slot>[\s\S]*?<h1\b/, file);
+  assert.match(html, /href="\/(?:zh|en)\/rss.xml"[^>]*data-astro-reload/, file);
+ }
+});
+
 test('all internal navigation, scripts, styles and images resolve to build output', () => {
  const failures = [];
  for (const file of pages) {

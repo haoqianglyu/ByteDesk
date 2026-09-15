@@ -7,6 +7,7 @@ import '../styles/zoji.css';
 import '../styles/window-resize.css';
 import '../styles/desktop-menu.css';
 import DesktopShell from '../components/DesktopShell.vue';
+import { ClientRouter } from 'astro:transitions';
 import { isIndexableSite } from '../lib/site';
 import { publishedPosts, forLocale, card } from '../lib/content';
 import { type Locale } from '../lib/i18n';
@@ -17,9 +18,10 @@ const production = isIndexableSite(Astro.site);
 const canonical = new URL(Astro.url.pathname, Astro.site);
 ---
 <!doctype html>
-<html lang={locale === 'zh' ? 'zh-CN' : 'en'}>
+<html lang={locale === 'zh' ? 'zh-CN' : 'en'} transition:animate="none">
  <head>
   <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <ClientRouter fallback="swap" />
   <title>{title}</title><meta name="description" content={description}/><link rel="icon" type="image/svg+xml" href="/favicon.svg?v=bytedesk-2"/>
   <meta name="theme-color" content="#102b50"/>
   {(!production || noindex) && <meta name="robots" content="noindex, follow"/>}
@@ -31,7 +33,10 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
    (() => { try { const p = localStorage.getItem('bytedesk-theme') || 'system'; document.documentElement.dataset.theme = p === 'dark' || (p === 'system' && matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light'; } catch { document.documentElement.dataset.theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; } })();
   </script>
  </head>
- <body><DesktopShell client:load locale={locale} active={active} alternateHref={alternateHref} posts={posts}><slot/></DesktopShell>
+ <body><DesktopShell client:load transition:persist="desktop-shell" locale={locale} active={active} alternateHref={alternateHref} posts={posts}><slot/></DesktopShell>
+  <script>
+   import '../lib/navigation';
+  </script>
   <script is:inline>
    // Restore the server-rendered menu before hydration to avoid a visible jump to its top.
    try {

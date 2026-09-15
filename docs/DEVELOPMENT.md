@@ -1,5 +1,13 @@
 # ByteDesk 设计与开发记录
 
+## 站内无刷新导航（2026-09-15）
+
+公共布局接入 Astro `ClientRouter`，站内链接和 Dock 首页按钮使用客户端导航。桌面 Vue 实例通过 `transition:persist` 保留，壁纸场景、窗口尺寸与模式不随页面切换重新创建；正文由 `navigation.ts` 在路由交换阶段替换 Astro 静态插槽的子节点，页面自己的 Vue 组件正常卸载和重新激活。没有添加整页淡入淡出。
+
+新页面同步标题、元信息、语言、菜单高亮和搜索数据。跳转收起菜单与搜索框，重新显示内容窗口；保留侧栏滚动位置，并按历史记录恢复正文窗口的滚动位置，包括文章目录锚点。RSS 显式使用普通导航，外链、下载和新标签页沿用浏览器行为。页面仍输出完整静态 HTML，可直接打开、刷新和分享。
+
+验证覆盖开发及生产预览的栏目、文章、查询参数筛选、语言切换、搜索、前进/返回、3D 页面离开后的画布清理，以及 390px 手机布局与横向菜单位置。检查、40 页构建与 42 项测试通过；构建仍有 Three.js 等大型共享模块的体积提示。
+
 ## 当前进展（2026-09-09）
 
 网站已上线至 [haoqianglyu.com](https://haoqianglyu.com/zh/)，使用 Cloudflare Workers Static Assets；图片与壁纸使用 `img.haoqianglyu.com` 对应的 R2 桶。源码已在 [GitHub](https://github.com/haoqianglyu/ByteDesk) 公开，GitHub Actions 的 CI/CD 已完成真实部署验证。

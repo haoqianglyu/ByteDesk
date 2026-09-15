@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, nextTick } from 'vue';
+import { computed, onMounted, onUnmounted, ref, nextTick, watch } from 'vue';
+import { navigate } from 'astro:transitions/client';
 import Icon from './Icon.vue';
 import BrandMark from './BrandMark.vue';
 import DesktopMenu from './DesktopMenu.vue';
@@ -138,7 +139,7 @@ function resizeWithKeyboard(event: KeyboardEvent, edge: ResizeEdge) {
 function toolbarDoubleClick(event: MouseEvent) {
  if (!fullscreen.value && !(event.target as HTMLElement).closest('button, a, input') && innerWidth > 600) toggleExpanded();
 }
-function locationToHome() { window.location.href = `/${props.locale}/`; }
+function locationToHome() { void navigate(`/${props.locale}/`); }
 const works = computed(() => showcaseItems(props.locale));
 const dockIds = ['daily', 'travel', 'lab', 'projects'] as const;
 const searchResults = computed(() => {
@@ -165,6 +166,18 @@ function keyboard(e: KeyboardEvent) {
 let timer: ReturnType<typeof setInterval>;
 let media: MediaQueryList;
 function systemChange() { if (theme.value === 'system') setTheme('system'); }
+function tick() { clock.value = new Intl.DateTimeFormat(props.locale === 'zh' ? 'zh-CN' : 'en-GB', { month: 'short', day: 'numeric', weekday: 'short', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date()); }
+watch(() => props.locale, () => {
+ tick();
+ try { localStorage.setItem('bytedesk-locale', props.locale); } catch {}
+});
+function prepareNavigation() {
+ endGesture(); saveSidebarScroll();
+ desktopMenu.value?.close(); themeMenu.value = false;
+ searchDialog.value?.close(); query.value = '';
+ hidden.value = false;
+}
+async function finishNavigation() { await nextTick(); restoreSidebarScroll(); }
 onMounted(async () => {
  try {
   desktop.value = innerWidth > 600;
@@ -179,16 +192,17 @@ onMounted(async () => {
  } catch {}
  wallpaperReady.value = true;
  try { theme.value = localStorage.getItem('bytedesk-theme') || 'system'; localStorage.setItem('bytedesk-locale', props.locale); } catch {}
- const tick = () => { clock.value = new Intl.DateTimeFormat(props.locale === 'zh' ? 'zh-CN' : 'en-GB', { month: 'short', day: 'numeric', weekday: 'short', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date()); };
  tick(); timer = setInterval(tick, 30000); media = matchMedia('(prefers-color-scheme: dark)'); media.addEventListener('change', systemChange);
  window.addEventListener('keydown', keyboard);
  window.addEventListener('resize', resetPosition);
  window.addEventListener('pagehide', saveSidebarScroll);
+ document.addEventListener('astro:before-swap', prepareNavigation);
+ document.addEventListener('astro:after-swap', finishNavigation);
  // Window mode changes its available height; restore after Vue applies that layout.
  await nextTick();
  restoreSidebarScroll();
 });
-onUnmounted(() => { endGesture(); clearInterval(timer); media?.removeEventListener('change', systemChange); window.removeEventListener('keydown', keyboard); window.removeEventListener('resize', resetPosition); window.removeEventListener('pagehide', saveSidebarScroll); });
+onUnmounted(() => { endGesture(); clearInterval(timer); media?.removeEventListener('change', systemChange); window.removeEventListener('keydown', keyboard); window.removeEventListener('resize', resetPosition); window.removeEventListener('pagehide', saveSidebarScroll); document.removeEventListener('astro:before-swap', prepareNavigation); document.removeEventListener('astro:after-swap', finishNavigation); });
 </script>
 <template>
  <div class="desktop-shell" :class="{ 'is-fullscreen': fullscreen, 'has-solar': solar }" @click.capture="saveSidebarScroll">
@@ -232,7 +246,7 @@ onUnmounted(() => { endGesture(); clearInterval(timer); media?.removeEventListen
       </template>
       <div class="sidebar-rule"></div>
       <a :href="`/${locale}/about/`" :class="['sidebar-link', { selected: active === 'about' }]" :aria-current="active === 'about' ? 'page' : undefined"><Icon name="about" :size="18"/>{{ t.about }}</a>
-      <a :href="`/${locale}/rss.xml`" class="sidebar-link"><Icon name="rss" :size="18"/>{{ t.rss }}</a>
+      <a :href="`/${locale}/rss.xml`" class="sidebar-link" data-astro-reload><Icon name="rss" :size="18"/>{{ t.rss }}</a>
      </nav>
      <div class="sidebar-bottom"><span class="online-dot"></span>{{ t.online }}<small>Made with curiosity <span>↗</span></small></div>
     </aside>
