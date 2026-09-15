@@ -3,11 +3,15 @@ import type { TransitionBeforeSwapEvent } from 'astro:transitions/client';
 type ScrollPosition = { left: number; top: number };
 const positions = new Map<string, ScrollPosition>();
 const entryKey = 'bytedeskEntry';
+// These keys only identify scroll positions in this document, not security tokens.
+// Avoid crypto.randomUUID, which is absent in older browsers and on HTTP origins.
+const entryPrefix = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+let entrySequence = 0;
 const content = () => document.querySelector<HTMLElement>('#main-content');
 const pageKey = () => location.pathname + location.search;
 
 function historyEntry(fresh = false): string {
- const key = !fresh && history.state?.[entryKey] || crypto.randomUUID();
+ const key = !fresh && history.state?.[entryKey] || `${entryPrefix}-${++entrySequence}`;
  history.replaceState({ ...history.state, [entryKey]: key }, '');
  return key;
 }

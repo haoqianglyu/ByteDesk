@@ -2,7 +2,7 @@
 import { computed, markRaw, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 import type { Locale } from '../lib/i18n';
 import { groupReportRanges, groupScannedReports, packReports, parseReportRanges, reportFileNames, validReportName, type ScannedFile, type ScannedReport } from '../lib/pdfReports';
-import { describePdfError, pdfToolFailureKind } from '../lib/pdfToolErrors';
+import { assertPdfBrowserSupport, describePdfError, pdfToolFailureKind } from '../lib/pdfToolErrors';
 
 const props = defineProps<{ locale: Locale }>();
 const zh = computed(() => props.locale === 'zh');
@@ -168,6 +168,7 @@ function errorMessage(error: unknown) {
   return t('无法读取或识别此 PDF。请检查文件是否损坏，并重试。', 'Could not read or recognize this PDF. Check the file and try again.');
 }
 function toolFailureMessage(error: unknown) {
+  if (error instanceof Error && error.name === 'PdfBrowserCompatibilityError') return t('当前浏览器缺少 PDF 识别所需的功能。请升级浏览器，或使用最新版 Chrome / Edge 打开本页后重新选择文件。原文件不受影响。', 'This browser is missing features required for PDF recognition. Update your browser or open this page in the latest Chrome / Edge and select your files again. Originals are unchanged.');
   const kind = pdfToolFailureKind(error);
   if (kind === 'resource') return t('识别程序资源未能加载，可能是网络问题或页面版本已更新。请刷新页面后重新选择文件；原文件不受影响。', 'Recognition resources could not load. The connection may have failed or this page may be out of date. Refresh and select your files again; originals are unchanged.');
   if (kind === 'compatibility') return t('识别程序遇到浏览器兼容性或脚本错误。请使用最新版 Chrome / Edge 重试，并查看下方错误详情。文件仍保留在本地。', 'Recognition encountered a browser compatibility or script error. Try the latest Chrome / Edge and check the error details below. Files remain local.');
@@ -180,6 +181,7 @@ async function scan() {
   progressText.value = t('正在准备本地识别工具，首次使用需要加载资源…', 'Preparing local recognition tools. Assets load on first use…');
   let scanner: Awaited<ReturnType<typeof import('../lib/pdfReportScanner')['createReportScanner']>> | undefined;
   try {
+    assertPdfBrowserSupport();
     const { createReportScanner } = await import('../lib/pdfReportScanner');
     scanner = await createReportScanner(signal);
     for (const [index, file] of files.value.entries()) {
@@ -206,7 +208,7 @@ async function scan() {
     else {
       console.error('[ByteDesk PDF] Recognition tools could not start', error);
       note.value = toolFailureMessage(error);
-      failureDetails.value = `${describePdfError(error)}\n\n${navigator.userAgent}`;
+      failureDetails.value = `${describePdfError(error)}\n\n${navigator.userAgent}\nSecure context: ${window.isSecureContext}; protocol: ${location.protocol}`;
     }
   } finally {
     scanningIndex.value = -1;

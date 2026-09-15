@@ -21,6 +21,13 @@ export default defineConfig({
         // Checks and builds must not overwrite a running dev server's dependencies.
         updateConfig({ vite: { cacheDir: `./node_modules/.vite/${command}` } });
       },
+      'astro:build:setup': ({ updateConfig }) => {
+        // Astro 7 sets the client environment to esnext after merging user Vite
+        // options. Lower it here so lazy Three.js/PDF chunks do not retain static
+        // class blocks and other syntax that older browser engines cannot parse.
+        // This lowers syntax only; the PDF runtime still needs its browser APIs.
+        updateConfig({ environments: { client: { build: { target: 'es2020' } } } });
+      },
     },
   }],
   trailingSlash: 'always',

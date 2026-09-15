@@ -1,5 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { createContext, runInContext } from 'node:vm';
+import ts from 'typescript';
 import { describePdfError, pdfToolFailureKind } from '../src/lib/pdfToolErrors.ts';
 
 test('initialization errors retain their original message, including worker string rejections', () => {
@@ -7,6 +10,22 @@ test('initialization errors retain their original message, including worker stri
  assert.equal(describePdfError('Failed to load worker'), 'Failed to load worker');
  assert.equal(describePdfError({ name: 'Error', message: 'Cross-realm error' }), 'Error: Cross-realm error');
  assert.equal(describePdfError(undefined), 'Unknown error');
+});
+
+test('PDF preflight reports missing native APIs before loading the scanner', () => {
+ const context = createContext({ exports: {}, DOMMatrix: function () {}, Worker: function () {}, structuredClone() {}, AbortSignal: { prototype: { throwIfAborted() {} } } });
+ const script = ts.transpileModule(readFileSync('src/lib/pdfToolErrors.ts', 'utf8'), {
+  compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 },
+ }).outputText;
+ runInContext(script, context);
+ assert.doesNotThrow(() => context.exports.assertPdfBrowserSupport());
+ runInContext('delete Promise.withResolvers; delete Array.prototype.at; delete globalThis.structuredClone;', context);
+ assert.throws(() => context.exports.assertPdfBrowserSupport(), error => {
+  assert.equal(error.name, 'PdfBrowserCompatibilityError');
+  for (const feature of ['Promise.withResolvers', 'Array.prototype.at', 'structuredClone']) assert.ok(error.message.includes(feature));
+  assert.equal(pdfToolFailureKind(error), 'compatibility');
+  return true;
+ });
 });
 
 test('known module load failures and missing browser APIs get different recovery guidance', () => {

@@ -35,6 +35,8 @@ npm run preview  # 预览 dist，先运行 build
 
 依赖版本由 `package-lock.json` 固定；`.npmrc` 使用 npm 官方下载源。当前文章使用 `.md` 文件，尚未接入 MDX。
 
+发布构建将客户端 JavaScript（包括动态导入的 Three.js 和 PDF.js 主模块）转换为 ES2020 语法，避免旧内核在 `static { … }` 等语法处直接报错。此设置不等于补齐浏览器 API 或承诺所有旧浏览器均可使用全部功能；开发服务器仍面向现代浏览器，兼容性检查使用 `build` 后的 `preview`。导航历史标识不依赖仅在部分安全环境中提供的 `crypto.randomUUID`。
+
 ### PDF 报告拆分
 
 入口为 `/zh/lab/pdf-reports/`（英文 `/en/lab/pdf-reports/`）。默认使用智能识别，按连续报告编号分组。切换到“统一页数”时初始为每 2 页一份，也可设置 4 页或其他 1–1,000 之间的整数；例如每 4 页按 1–4、5–8 页分组，逐页读取右上角的报告编号并核对；无法识别、字符纠正或组内编号不一致时，需在原图旁核对并确认。末尾不足一份的页面会一起保留并提示核对。相同输出文件名追加 `_2`、`_3`，ZIP 仅包含拆分后的 PDF，来源文件和原页码可在页面中核对。
@@ -50,6 +52,8 @@ npm run preview  # 预览 dist，先运行 build
 PDF.js、Tesseract.js、英文编号与中文页码识别模型均由本站提供，不向第三方上传 PDF。PDF.js 主程序及 Worker 使用同版本的官方 `legacy` 兼容构建；Worker 使用独立文件名 `pdf.worker.legacy.min.mjs`，避免命中原先现代构建的缓存。`predev` / `prebuild` 自动从 npm 依赖准备 `public/vendor/pdf-tools-v1/`，该生成目录不提交；升级依赖时需要同步递增资源路径版本。用户文件、试拆结果和临时识别图片放在已忽略的 `output/`、`tmp/`，不进入网站构建。
 
 如果点击“开始识别”后工具未能启动，可展开“查看错误详情”，获取原始错误及浏览器版本；同一异常也会记录到 Console。资源加载失败可能来自网络或过期页面，刷新会清空当前已选文件；兼容性或未知初始化错误不会再统一提示“检查网络”。排查时先保留错误详情，勿仅凭提示认定 PDF 损坏或浏览器不兼容。
+
+PDF 识别在加载前检查 `Promise.withResolvers`、`structuredClone` 等必要能力。缺失时提示升级浏览器，并在错误详情列出缺项、安全上下文和协议。PDF.js 官方当前 `legacy` 支持范围包括 Chrome 125+、Safari 18+（部分功能有限）和 Firefox ESR+，详见 [PDF.js 浏览器支持说明](https://github.com/mozilla/pdf.js/wiki/Frequently-Asked-Questions#which-browsersenvironments-are-supported)。ES2020 语法转换不会把识别引擎的 API 要求降到所有 ES2020 浏览器；独立 Worker 保持官方兼容构建。
 
 开发预览会在启动时预构建 PDF、OCR 和 ZIP 依赖，避免首次点击拆分才发现依赖并触发整页刷新。准备识别资源时只写入有变化的文件，重复构建不会因重写相同资源而清空当前选择。
 
