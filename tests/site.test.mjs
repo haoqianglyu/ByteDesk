@@ -11,7 +11,9 @@ const indexable = isIndexableSite(site);
 const root = resolve('dist');
 const read = path => readFileSync(join(root, path), 'utf8');
 function walk(dir) { return readdirSync(dir, { withFileTypes: true }).flatMap(e => e.isDirectory() ? walk(join(dir, e.name)) : [join(dir, e.name)]); }
-const pages = walk(root).filter(p => p.endsWith('.html'));
+// HTML copied verbatim from public/ (e.g. /letterfold/) is standalone, not an Astro page.
+const fromPublic = p => existsSync(join(resolve('public'), p.slice(root.length)));
+const pages = walk(root).filter(p => p.endsWith('.html') && !fromPublic(p));
 const decode = s => s.replaceAll('&amp;', '&').replaceAll('&#39;', "'").replaceAll('&quot;', '"');
 
 test('every desktop route supports client navigation and keeps its page content server rendered', () => {
