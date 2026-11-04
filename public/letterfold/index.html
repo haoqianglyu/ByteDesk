@@ -1,6 +1,7 @@
-<!doctype html><html lang="zh-Hans"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>折信 Letterfold · 支持 Support</title><style>body{margin:0;background:#F1ECE4;color:#211E1A;font:17px/1.7 "Songti SC","New York",Georgia,serif}main{max-width:36rem;margin:0 auto;padding:3rem 1.5rem}h1{font-weight:900;font-size:2rem;margin:0 0 .2rem}h2{font-size:1.1rem;margin-top:2.2rem;border-top:1px solid #d8d0c4;padding-top:1.2rem}.en{font-family:"New York",Georgia,serif}hr{border:0;width:2rem;border-top:2px solid #C0392B;margin:1.2rem 0}small,a{color:#6b6257}</style></head><body><main>
+<!doctype html><html lang="zh-Hans"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>折信 Letterfold · 支持 Support</title><style>body{margin:0;background:#F1ECE4;color:#211E1A;font:17px/1.7 "Songti SC","New York",Georgia,serif}main{max-width:36rem;margin:0 auto;padding:3rem 1.5rem}h1{font-weight:900;font-size:2rem;margin:0 0 .2rem}h2{font-size:1.1rem;margin-top:2.2rem;border-top:1px solid #d8d0c4;padding-top:1.2rem}.en{font-family:"New York",Georgia,serif}hr{border:0;width:2rem;border-top:2px solid #C0392B;margin:1.2rem 0}small,a{color:#6b6257}.phone{position:relative;width:min(15rem,70vw);aspect-ratio:886/1920;margin:1.8rem auto 0;border:.5rem solid #211E1A;border-radius:2.1rem;background:#211E1A;overflow:hidden;box-shadow:0 18px 40px -16px rgba(33,30,26,.5);cursor:pointer}.phone video{display:block;width:100%;height:100%;object-fit:cover;border-radius:1.6rem}.phone button{position:absolute;border:0;cursor:pointer;color:#F1ECE4;background:rgba(33,30,26,.62);border-radius:99px;width:2.4rem;height:2.4rem;display:flex;align-items:center;justify-content:center;padding:0}.phone .snd{right:.6rem;bottom:.6rem}.phone .play{display:none;left:50%;top:50%;transform:translate(-50%,-50%);width:3.6rem;height:3.6rem}.phone.paused .play{display:flex}.phone svg{width:1.2rem;height:1.2rem;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.phone .on{display:none}.phone.sound .on{display:block}.phone.sound .off{display:none}</style></head><body><main>
 <h1>折信</h1><div class="en"><i>Letterfold</i></div><hr>
 <p>一本合上才能读懂的书。</p>
+<div class="phone" id="pv"><video id="pvv" muted loop playsinline preload="metadata" poster="preview-zh.jpg" src="preview-zh.mp4" aria-label="折信 Letterfold App Preview"></video><button class="play" id="pvp" aria-label="Play"><svg viewBox="0 0 24 24" style="fill:currentColor;stroke:none"><path d="M8 5v14l11-7z"/></svg></button><button class="snd" id="pvs" aria-label="Sound"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><g class="on"><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a8.5 8.5 0 0 1 0 12"/></g><g class="off"><path d="M17 9l5 6M22 9l-5 6"/></g></svg></button></div>
 <h2>支持</h2>
 <p>遇到问题、发现错字，或者只是想说一句话，请写信到 <a href="mailto:haoqianglyu@gmail.com">haoqianglyu@gmail.com</a>。请附上设备型号和 iOS 版本。</p>
 <p>进度只保存在你的设备上。删除 App 会清除进度；设置里也可以「重新开始」。</p>
@@ -10,4 +11,14 @@
 <p class="en">For problems, typos, or just a note, write to <a href="mailto:haoqianglyu@gmail.com">haoqianglyu@gmail.com</a>, with your device model and iOS version.</p>
 <p class="en">Progress is stored only on your device. Deleting the app erases it.</p>
 <p class="en"><a href="privacy/">Privacy Policy</a></p>
-<p><small>© 2026 Haoqiang Lyu</small></p></main></body></html>
+<p><small>© 2026 Haoqiang Lyu</small></p></main><script>(function(){var v=document.getElementById("pvv"),f=document.getElementById("pv"),b=document.getElementById("pvs"),p=document.getElementById("pvp");
+var q=new URLSearchParams(location.search).get("lang"),n=(q||(navigator.languages&&navigator.languages[0])||navigator.language||"zh").toLowerCase(),l=/^en/.test(n)?"en":/^ja/.test(n)?"ja":/^ko/.test(n)?"ko":"zh";
+if(l!="zh"){v.poster="preview-"+l+".jpg";v.src="preview-"+l+".mp4"}
+var rm=matchMedia("(prefers-reduced-motion: reduce)").matches;
+function sync(){f.classList.toggle("paused",v.paused);f.classList.toggle("sound",!v.muted)}
+v.addEventListener("play",sync);v.addEventListener("pause",sync);
+if(rm){v.removeAttribute("autoplay");f.classList.add("paused")}else{v.autoplay=true;var r=v.play();if(r&&r.catch)r.catch(sync)}
+b.onclick=function(e){e.stopPropagation();v.muted=!v.muted;if(v.paused)v.play();sync()};
+p.onclick=function(e){e.stopPropagation();v.play()};
+f.onclick=function(){v.muted=!v.muted;if(v.paused)v.play();sync()};
+sync()})()</script></body></html>
